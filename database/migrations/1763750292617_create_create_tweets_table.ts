@@ -5,10 +5,46 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').primary()
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      // Clé étrangère vers USERS (ON DELETE CASCADE)
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+        .notNullable()
+
+      table.text('content').nullable()
+      table.string('media_url').nullable()
+
+      // Auto-Références (Réponse et Retweet)
+      table
+        .integer('parent_id')
+        .unsigned()
+        .references('id')
+        .inTable('tweets')
+        .onDelete('SET NULL')
+        .nullable()
+        .comment('Réponse à un autre tweet.')
+      table
+        .integer('retweet_id')
+        .unsigned()
+        .references('id')
+        .inTable('tweets')
+        .onDelete('SET NULL')
+        .nullable()
+        .comment("Retweet d'un autre tweet.")
+
+      // Compteurs dénormalisés
+      table.integer('replies_count').notNullable().defaultTo(0)
+      table.integer('retweets_count').notNullable().defaultTo(0)
+      table.integer('likes_count').notNullable().defaultTo(0)
+
+      // Champs de l'horodatage
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
     })
   }
 

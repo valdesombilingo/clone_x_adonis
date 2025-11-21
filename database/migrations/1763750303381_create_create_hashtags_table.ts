@@ -5,10 +5,12 @@ export default class extends BaseSchema {
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
-      table.increments('id')
+      table.increments('id').primary()
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
+      table.string('name', 100).notNullable().unique().comment('Le texte du hashtag (ex: adonisjs)')
+
+      table.timestamp('created_at', { useTz: true }).notNullable()
+      table.timestamp('updated_at', { useTz: true }).notNullable()
     })
   }
 
