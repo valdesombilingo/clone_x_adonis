@@ -1,7 +1,7 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
 
 export default class extends BaseSchema {
-  protected tableName = 'create_follows'
+  protected tableName = 'blocks'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
@@ -9,33 +9,33 @@ export default class extends BaseSchema {
 
       // Clés étrangères vers USERS (ON DELETE CASCADE)
       table
-        .integer('follower_id')
+        .integer('blocker_id')
         .unsigned()
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
         .notNullable()
-        .comment('Utilisateur qui suit')
-      table
-        .integer('following_id')
-        .unsigned()
-        .references('id')
-        .inTable('users')
-        .onDelete('CASCADE')
-        .notNullable()
-        .comment('Utilisateur qui est suivi')
+        .comment('Utilisateur qui effectue le blocage')
 
       table
-        .boolean('is_accepted')
+        .integer('blocked_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
         .notNullable()
-        .defaultTo(true)
-        .comment('Requis pour les comptes privés')
+        .comment('Utilisateur qui est bloqué')
 
       table.timestamp('created_at', { useTz: true }).notNullable()
       table.timestamp('updated_at', { useTz: true }).nullable()
 
-      // Contrainte unique: un seul suivi entre deux utilisateurs
-      table.unique(['follower_id', 'following_id'])
+      // Contrainte unique
+      table.unique(['blocker_id', 'blocked_id'])
+    })
+
+    this.schema.alterTable(this.tableName, (table) => {
+      // Ajouter un index pour optimiser la recherche rapide (Ex: Est-ce que User X bloque User Y?)
+      table.index(['blocker_id', 'blocked_id'])
     })
   }
 
