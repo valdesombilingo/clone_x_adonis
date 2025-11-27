@@ -1,6 +1,6 @@
-{{-- Demo test de la landing page avec formulaires d'inscription et de connexion utilisant Tailwind CSS. --}}
+{{-- Demo test Landing page avec formulaires d'inscription et de connexion --}}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,77 +11,107 @@
 
     </script>
   </head>
-  <body class="flex flex-col items-center gap-10 mt-20">
+  <body class="bg-white">
+    <div class="flex flex-col items-center justify-center min-h-screen gap-10 px-4">
+      <h1 class="text-4xl font-bold text-center">
+        Bienvenue sur Clone X !
+      </h1>
 
-    <h1 class="text-3xl font-bold">
-      Bienvenue sur X (Tweeter) !
-    </h1>
+      <div class="flex flex-col md:flex-row gap-8 w-full max-w-4xl">
 
-    <div class="flex border border-black p-5 w-2/3">
-
-      {{-- formulaire d'inscription --}}
-      <form
-        action="/auth/signup"
-        method="post"
-        class="border border-black p-5 flex flex-col gap-5 flex-1 transition ease-in-out duration-200"
-      >
-        {{ csrfField() }}
-        <h2 class="text-center text-xl font-semibold">
-          Inscription
-        </h2>
-
-        <input type="text" name="full_name" placeholder="Nom complet" class="border border-black p-2" required />
-        <input type="email" name="email" placeholder="Email" class="border border-black p-2" required />
-        <input type="date" name="date_of_birth" class="border border-black p-2" required />
-        <input
-          type="password"
-          name="password"
-          placeholder="Mot de passe"
-          class="border border-black p-2"
-          required
-        />
-        <input
-          type="password"
-          name="password_confirmation"
-          placeholder="Confirmer le mot de passe"
-          class="border border-black p-2"
-          required
-        />
-
-        <button type="submit" class="bg-blue-500 text-white p-2 hover:bg-blue-600 transition-all duration-300">
-          S'inscrire
-        </button>
-      </form>
-
-      {{-- formulaire de connexion --}}
-      <form
-        action="/auth/login"
-        method="post"
-        class="border border-black p-5 flex flex-col gap-5 flex-1 ml-4"
-      >
-
-        {{ csrfField() }}
-        <h2 class="text-center text-xl font-semibold">
-          Connexion
-        </h2>
-
-        <input type="email" name="email" placeholder="Email" class="border border-black p-2" required />
-        <input
-          type="password"
-          name="password"
-          placeholder="Mot de passe"
-          class="border border-black p-2"
-          required
-        />
-
-        <button
-          type="submit"
-          class="bg-green-500 text-white p-2 hover:bg-green-600 transition ease-in-out duration-200"
+        {{-- Formulaire d'inscription --}}
+        <form
+          action="/auth/signup"
+          method="post"
+          class="flex flex-col gap-4 flex-1 p-6 border border-gray-300 rounded-lg shadow-md"
         >
-          Se connecter
-        </button>
-      </form>
-    </div>
+          {{ csrfField() }}
+          <h2 class="text-2xl font-semibold text-center mb-4">
+            Inscription
+          </h2>
 
+          <input
+            type="text"
+            name="full_name"
+            placeholder="Nom complet"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            type="date"
+            name="date_of_birth"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe (min 8 caractères)"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+          <input
+            type="password"
+            name="password_confirmation"
+            placeholder="Confirmer le mot de passe"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+
+          <button
+            type="submit"
+            class="w-full bg-blue-500 text-white font-semibold py-2 rounded-md hover:bg-blue-600 transition-all duration-300"
+          >
+            S'inscrire
+          </button>
+        </form>
+
+        {{-- Formulaire de connexion --}}
+        <form
+          action="/auth/login"
+          method="post"
+          class="flex flex-col gap-4 flex-1 p-6 border border-gray-300 rounded-lg shadow-md"
+        >
+          {{ csrfField() }}
+          <h2 class="text-2xl font-semibold text-center mb-4">
+            Connexion
+          </h2>
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+
+          <input
+            type="password"
+            name="password"
+            placeholder="Mot de passe"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+
+          <button
+            type="submit"
+            class="w-full bg-green-500 text-white font-semibold py-2 rounded-md hover:bg-green-600 transition-all duration-300"
+          >
+            Se connecter
+          </button>
+        </form>
+
+      </div>
+    </div>
   </body>
 </html>

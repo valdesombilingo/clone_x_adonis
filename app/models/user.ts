@@ -25,42 +25,44 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   // Champs de Profil
   @column()
-  declare full_name: string
+  declare fullName: string
 
   @column.date()
-  declare date_of_birth: DateTime | null
+  declare dateOfBirth: DateTime | null
 
   @column()
   declare bio: string | null
 
   @column()
-  declare avatar_url: string | null
+  declare avatarUrl: string | null
 
   @column()
-  declare banner_image: string | null
+  declare bannerImage: string | null
 
   @column()
   declare location: string | null
 
   @column()
-  declare website_url: string | null
+  declare websiteUrl: string | null
 
   // Champs de Sécurité / Fonctionnalités
   @column()
-  declare is_verified: boolean
+  declare isEmailVerified: boolean
+  @column()
+  declare isPrivate: boolean
 
   @column()
-  declare is_private: boolean
+  declare emailVerificationToken: string | null
 
-  @column({ serializeAs: null })
-  declare remember_me_token: string | null
+  @column.dateTime({ serializeAs: null })
+  declare emailVerifiedAt: DateTime | null
 
   // Compteurs Dénormalisés
   @column()
-  declare followers_count: number
+  declare followersCount: number
 
   @column()
-  declare following_count: number
+  declare followingCount: number
 
   // Champs de l'Horodatage
   @column.dateTime({ autoCreate: true })
