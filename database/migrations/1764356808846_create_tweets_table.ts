@@ -17,7 +17,7 @@ export default class extends BaseSchema {
         .notNullable()
 
       table.text('content').nullable()
-      table.string('media_url').nullable()
+      table.string('media_url', 255).nullable()
 
       // Auto-Références (Réponse et Retweet)
       table

@@ -21,7 +21,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare password: string
 
   @column()
-  declare username: string
+  declare userName: string
 
   // Champs de Profil
   @column()
@@ -48,14 +48,18 @@ export default class User extends compose(BaseModel, AuthFinder) {
   // Champs de Sécurité / Fonctionnalités
   @column()
   declare isEmailVerified: boolean
-  @column()
-  declare isPrivate: boolean
 
   @column()
   declare emailVerificationToken: string | null
 
   @column.dateTime({ serializeAs: null })
   declare emailVerifiedAt: DateTime | null
+
+  @column({ serializeAs: null })
+  declare rememberMeToken: string | null
+
+  @column()
+  declare isPrivate: boolean
 
   // Compteurs Dénormalisés
   @column()

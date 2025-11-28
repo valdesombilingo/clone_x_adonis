@@ -10,7 +10,7 @@ export default class extends BaseSchema {
       // Champs d'authentification de base
       table.string('email', 255).notNullable().unique()
       table.string('password', 255).notNullable()
-      table.string('username', 50).notNullable().unique().comment('@utilisateur')
+      table.string('user_name', 50).notNullable().unique().comment('@utilisateur')
       table.string('full_name', 100).notNullable()
       table.date('date_of_birth').nullable()
 
@@ -23,12 +23,17 @@ export default class extends BaseSchema {
 
       // Champs de sécurité / fonctionnalités
       table
-        .boolean('is_verified')
-        .notNullable()
+        .boolean('is_email_verified')
         .defaultTo(false)
-        .comment('Pour la confirmation d’email')
+        .notNullable()
+        .comment("Indique si l'email est vérifié")
+      table.string('email_verification_token', 255).nullable()
+      table.timestamp('email_verified_at', { useTz: true }).nullable()
+      table
+        .string('remember_me_token', 255)
+        .nullable()
+        .comment('Token pour la session longue durée')
       table.boolean('is_private').notNullable().defaultTo(false).comment('Compte privé')
-      table.string('remember_me_token').nullable().comment('Token pour la session longue durée')
 
       // Compteurs dénormalisés
       table.integer('followers_count').notNullable().defaultTo(0)
