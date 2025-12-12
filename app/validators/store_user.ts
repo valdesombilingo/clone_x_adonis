@@ -1,5 +1,3 @@
-// app/validators/signup_validator.ts
-
 import vine from '@vinejs/vine'
 
 export const storeUserValidator = vine.compile(
