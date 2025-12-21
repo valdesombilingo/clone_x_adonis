@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Clone X - Vérification Email
+    </title>
+    <script src="https://cdn.tailwindcss.com">
+
+    </script>
+  </head>
+  <body class="bg-gray-50">
+    <div class="flex flex-col items-center justify-center min-h-screen px-4">
+      <!-- Titre principal -->
+      <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">
+        Vérifiez votre adresse email
+      </h1>
+
+      <!-- Carte de contenu -->
+      <div class="w-full max-w-md bg-white border border-gray-200 rounded-lg shadow-md p-6">
+        <h2 class="text-xl font-semibold text-center mb-4">
+          Bonjour {{ user.fullName }},
+        </h2>
+
+        <p class="text-gray-700 text-center mb-6">
+          Merci de vous être inscrit à <span class="font-bold">Clone X</span>.<br />
+          Pour activer votre compte, veuillez confirmer votre adresse email en cliquant sur le bouton ci-dessous.
+        </p>
+
+        <!-- Bouton de confirmation -->
+        <div class="flex justify-center">
+          <a
+            href="{{ verificationUrl }}"
+            class="bg-blue-500 text-white font-semibold px-6 py-2 rounded-md hover:bg-blue-600 transition-all duration-300"
+          >
+            Confirmer mon email
+          </a>
+        </div>
+
+        <p class="text-sm text-gray-500 text-center mt-6">
+          Ce lien est valable 24 heures. Si vous n’avez pas créé de compte, ignorez simplement cet email.
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

@@ -2,48 +2,45 @@ import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import { DateTime } from 'luxon'
 
+/**
+ * NOTE : VerifyEmailsController
+ * Gère la validation des adresses email via un jeton (token) unique.
+ */
 export default class VerifyEmailsController {
   /**
-   * NOTE: Ce Controller Vérifie le token de confirmation d'email
+   * handleVerification
+   * Traite le clic sur le lien de confirmation envoyé par email.
    */
-  async handleVerification({ params, response, auth, session }: HttpContext) {
-    try {
-      // 1. Recherche de l'utilisateur avec le token
-      const user = await User.query().where('emailVerificationToken', params.token).first()
+  async handleVerification({ params, response, session, auth }: HttpContext) {
+    // 1. Récupération du token depuis l'URL
+    const token = params.token
 
-      if (!user) {
-        session.flash(
-          'error',
-          'Lien de vérification invalide ou expiré. Veuillez demander un nouveau lien.'
-        )
-        return response.redirect().toRoute('verification_needed')
-      }
+    // 2. Recherche de l'utilisateur associé à ce jeton
+    const user = await User.query().where('emailVerificationToken', token).first()
 
-      // 2. Vérification de l’expiration du token (24h après création du compte)
-      const tokenCreatedAt = user.createdAt
-      const now = DateTime.now()
-      if (tokenCreatedAt && now.diff(tokenCreatedAt, 'hours').hours > 24) {
-        session.flash('error', 'Lien de vérification expiré. Veuillez demander un nouveau lien.')
-        return response.redirect().toRoute('verification_needed')
-      }
+    // 3. Gestion du cas où le jeton n'existe pas ou est invalide
+    if (!user) {
+      session.flash('error', 'Lien invalide ou utilisateur introuvable.')
+      return response.redirect().toRoute('register')
+    }
 
-      // 3. Validation du compte
-      user.isEmailVerified = true
-      user.emailVerificationToken = null
-      user.emailTokenExpiresAt = null
-      user.emailVerifiedAt = DateTime.now()
-      await user.save()
-
-      // 4. Connexion automatique avec session longue (30 jours)
-      await auth.use('web').login(user, true)
-
-      // 5. Message flash de succès et redirection
-      session.flash('success', `Bienvenue, ${user.fullName} !`)
-      return response.redirect().toRoute('home')
-    } catch (error) {
-      console.error(error)
-      session.flash('error', 'Une erreur est survenue. Veuillez réessayer.')
+    // 4. Vérification de l'expiration du jeton (Sécurité accrue)
+    if (user.emailTokenExpiresAt && DateTime.now() > user.emailTokenExpiresAt) {
+      session.flash('error', 'Lien expiré. Veuillez demander un nouveau lien.')
       return response.redirect().toRoute('verification_needed')
     }
+
+    // 5. Mise à jour du statut de l'utilisateur
+    user.isEmailVerified = true
+    user.emailVerifiedAt = DateTime.now()
+    user.emailVerificationToken = null
+    await user.save()
+
+    // 6. Connexion automatique de l'utilisateur
+    await auth.use('web').login(user)
+
+    // 7. Notification de succès et redirection home
+    session.flash('success', `Votre email a été confirmé. Bienvenue ${user.fullName} !`)
+    return response.redirect().toRoute('home')
   }
 }

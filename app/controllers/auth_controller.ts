@@ -5,8 +5,7 @@ import { DateTime } from 'luxon'
 import { storeUserValidator } from '#validators/store_user'
 import { authenticateValidator } from '#validators/auth'
 import crypto from 'node:crypto'
-// import mail from '@adonisjs/mail/services/main'
-// import UserVerificationMail from '#mails/user_verification'
+import mail from '@adonisjs/mail/services/main'
 
 /**
  * Contrôleur d'authentification :
@@ -35,7 +34,7 @@ export default class AuthController {
     let suffix = 0
 
     while (true) {
-      const existingUser = await User.query().where('username', username).first()
+      const existingUser = await User.query().where('userName', username).first()
       if (!existingUser) return username
       suffix++
       username = `${baseUsername}${suffix}`
@@ -51,7 +50,12 @@ export default class AuthController {
       // 1. Validation des données
       const validatedData = await request.validateUsing(storeUserValidator)
 
-      const { full_name: fullName, date_of_birth: dateOfBirth, ...dataToStore } = validatedData
+      const {
+        full_name: fullName,
+        date_of_birth: dateOfBirth,
+        password_confirmation: passwordConfirmation,
+        ...dataToStore
+      } = validatedData
 
       let processedDateOfBirth = null
       if (dateOfBirth) {
@@ -83,7 +87,7 @@ export default class AuthController {
       const emailVerificationToken = crypto.randomBytes(60).toString('hex')
 
       // 5. Création utilisateur
-      await User.create({
+      const user = await User.create({
         ...dataToStore,
         fullName,
         userName: uniqueUsername,
@@ -94,8 +98,21 @@ export default class AuthController {
         emailVerifiedAt: null,
       })
 
-      // 6. Envoi email (à activer une fois le service mail configuré)
-      // await mail.sendLater(new UserVerificationMail(user))
+      // 6. Envoi du mail de vérification
+      try {
+        const verificationUrl = `http://localhost:3333/verify-email/${user.emailVerificationToken}`
+        await mail.send((message) => {
+          message
+            .to(user.email)
+            .from('no-reply@tonapp.com')
+            .subject('Confirmez votre adresse email')
+            .htmlView('emails/verify_email', { user, verificationUrl })
+        })
+      } catch (mailError) {
+        console.error('Erreur lors de l’envoi du mail :', mailError)
+        session.flash('error', 'Erreur lors de l’envoi du mail. Vérifiez la configuration SMTP.')
+        return response.redirect().back()
+      }
 
       // 7. Message flash de succès et Redirection
       session.flash(
@@ -143,7 +160,8 @@ export default class AuthController {
       }
 
       // 4. Connexion
-      await auth.use('web').login(user, true)
+      await auth.use('web').login(user)
+      console.log('auth.check après login:', await auth.check())
 
       // 5. Redirection avec message de succès
       session.flash('success', `Bienvenue, ${user.fullName} !`)
@@ -194,14 +212,27 @@ export default class AuthController {
         return response.redirect().toRoute('verification_needed')
       }
 
-      // 4. Générer un nouveau token valable 1h
+      // 4. Générer un nouveau token valable 24h
       const newToken = crypto.randomBytes(60).toString('hex')
       user.emailVerificationToken = newToken
-      user.emailTokenExpiresAt = DateTime.now().plus({ hours: 1 })
+      user.emailTokenExpiresAt = DateTime.now().plus({ hours: 24 })
       await user.save()
 
-      // 5. Envoyer le mail
-      // await mail.sendLater(new UserVerificationMail(user))
+      // 5. Renvoi du mail de vérification
+      try {
+        const verificationUrl = `http://localhost:3333/verify-email/${user.emailVerificationToken}`
+        await mail.send((message) => {
+          message
+            .to(user.email)
+            .from('no-reply@tonapp.com')
+            .subject('Confirmez votre adresse email')
+            .htmlView('emails/verify_email', { user, verificationUrl })
+        })
+      } catch (mailError) {
+        console.error('Erreur lors de l’envoi du mail :', mailError)
+        session.flash('error', 'Erreur lors de l’envoi du mail. Vérifiez la configuration SMTP.')
+        return response.redirect().back()
+      }
 
       session.flash(
         'success',

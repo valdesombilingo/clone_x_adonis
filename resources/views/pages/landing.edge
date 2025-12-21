@@ -1,0 +1,33 @@
+{{-- Demo test Landing page avec boutons d'inscription et de connexion --}}
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Clone X - Landing Page
+    </title>
+    <script src="https://cdn.tailwindcss.com">
+
+    </script>
+  </head>
+  <body class="bg-white">
+    <div class="flex flex-col items-center justify-center min-h-screen gap-10 px-4">
+      <h1 class="text-4xl font-bold text-center">
+        Bienvenue sur Clone X !
+      </h1>
+      <div class="flex flex-col justify-center md:flex-row gap-8 w-full max-w-2xl">
+        <a
+          href="{{ route('register') }}"
+          class="bg-blue-500 text-white font-semibold py-2 px-16 rounded-md hover:bg-blue-600 transition-all duration-300"
+        >Inscription</a>
+
+        <a
+          href="{{ route('login') }}"
+          class="bg-green-500 text-white font-semibold py-2 px-16 rounded-md hover:bg-green-600 transition-all duration-300"
+        >Connexion</a>
+      </div>
+
+    </div>
+  </body>
+</html>
