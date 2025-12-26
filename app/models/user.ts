@@ -1,8 +1,10 @@
 import { DateTime } from 'luxon'
 import hash from '@adonisjs/core/services/hash'
 import { compose } from '@adonisjs/core/helpers'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
+import type { HasMany } from '@adonisjs/lucid/types/relations'
+import PasswordReset from '#models/password_reset'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -13,7 +15,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column({ isPrimary: true })
   declare id: number
 
-  // Champs d'Authentification
+  // --- Champs d'Authentification ---
   @column()
   declare email: string
 
@@ -23,7 +25,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare userName: string
 
-  // Champs de Profil
+  // --- Champs de Profil ---
   @column()
   declare fullName: string
 
@@ -45,7 +47,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare websiteUrl: string | null
 
-  // Champs de Sécurité / Fonctionnalités
+  // --- Champs de Sécurité ---
   @column()
   declare isEmailVerified: boolean
 
@@ -64,17 +66,21 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare isPrivate: boolean
 
-  // Compteurs Dénormalisés
+  // --- Compteurs Dénormalisés ---
   @column()
   declare followersCount: number
 
   @column()
   declare followingCount: number
 
-  // Champs de l'Horodatage
+  // --- Champs de l'Horodatage ---
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
+
+  // Définition de la relation à l'intérieur de la classe
+  @hasMany(() => PasswordReset)
+  declare passwordResets: HasMany<typeof PasswordReset>
 }
