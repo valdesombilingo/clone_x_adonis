@@ -1,0 +1,19 @@
+{{-- Bouton social (Google, Apple, etc.) --}}
+@if(type === 'social')
+  <button class="btn-social-auth">
+    <img src="{{ img }}" class="icon-social-auth" />
+    <span>{{ label }}</span>
+  </button>
+
+  {{-- Bouton primaire (Créer un compte, etc.) --}}
+@elseif(type === 'primary')
+  <a href="{{ route('register') }}" class="primary-btn">
+    {{ label }}
+  </a>
+
+  {{-- Bouton secondaire (Se connecter, etc.) --}}
+@elseif(type === 'secondary')
+  <a href="{{ route('login') }}" class="secondary-btn">
+    {{ label }}
+  </a>
+@endif

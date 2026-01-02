@@ -42,10 +42,12 @@
     "@swc/core": "1.11.24",
     "@types/luxon": "^3.7.1",
     "@types/node": "^22.15.18",
+    "autoprefixer": "^10.4.23",
     "eslint": "^9.26.0",
     "hot-hook": "^0.4.0",
     "pino-pretty": "^13.0.0",
     "prettier": "^3.5.3",
+    "tailwindcss": "^3.4.19",
     "ts-node-maintained": "^10.9.5",
     "typescript": "~5.8",
     "vite": "^6.3.5"
@@ -59,6 +61,9 @@
     "@adonisjs/shield": "^8.2.0",
     "@adonisjs/static": "^1.1.1",
     "@adonisjs/vite": "^4.0.0",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.11",
+    "@tailwindcss/typography": "^0.5.19",
     "@vinejs/vine": "^3.0.1",
     "edge.js": "^6.2.1",
     "luxon": "^3.7.2",
@@ -71,5 +76,20 @@
       "./app/middleware/*.ts"
     ]
   },
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "description": "",
+  "main": "ace.js",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kadea-academy-learners/2025-dev-midi-projet-clone-x-with-adonis-valdesombilingo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "bugs": {
+    "url": "https://github.com/kadea-academy-learners/2025-dev-midi-projet-clone-x-with-adonis-valdesombilingo/issues"
+  },
+  "homepage": "https://github.com/kadea-academy-learners/2025-dev-midi-projet-clone-x-with-adonis-valdesombilingo#readme"
 }

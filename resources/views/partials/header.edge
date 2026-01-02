@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+  {{-- =========================== METADONNÉES HEAD =========================== --}}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    {{-- SEO Dynamique --}}
+    <meta
+      name="description"
+      content="{{ description || 'Bienvenue sur X Clone. Rejoignez la conversation, suivez l\'actualité en temps réel et connectez-vous avec le monde entier.' }}"
+    />
+    <title>
+      {{ title || 'Bienvenue sur X (Clone)' }}
+    </title>
+
+    {{-- Vite pour le CSS et JS --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+  </head>
+  <body>
+

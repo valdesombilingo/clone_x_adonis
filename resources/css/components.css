@@ -1,0 +1,48 @@
+/* Bouton social (Google, Apple, etc.) */
+.btn-social-auth {
+  @apply bg-background-light text-neutral-dark font-medium rounded-full 
+         border border-background-light flex items-center justify-center gap-2 
+         text-base px-6 py-2 
+         transition-all duration-200 ease-in-out
+         sm:px-10
+         md:px-14;
+  @apply lg:hover:bg-neutral-light lg:hover:border-neutral-light;
+}
+
+/* Icônes svg des boutons sociaux */
+.icon-social-auth {
+  @apply w-4 h-4 sm:w-5 sm:h-5;
+}
+
+/* Bouton primaire (Créer un compte, etc.) */
+.primary-btn {
+  @apply bg-brand-primary text-background-light text-center font-semibold rounded-full 
+         border border-brand-primary text-base px-6 py-2 
+         transition-all duration-200 ease-in-out
+         sm:px-10
+         md:px-14;
+  @apply lg:hover:bg-brand-hoverPrimary lg:hover:border-brand-hoverPrimary;
+}
+
+/* Bouton secondaire (Se connecter) */
+.secondary-btn {
+  @apply bg-transparent text-background-light text-center font-semibold rounded-full 
+         border text-base px-6 py-2 
+         transition-all duration-200 ease-in-out
+         sm:px-10
+         md:px-14;
+  /* Hover limité au desktop */
+  @apply lg:hover:bg-brand-primary/10;
+}
+
+/* Style des liens primaires */
+.primary-link {
+  @apply text-brand-primary transition-all duration-200 ease-in-out;
+  @apply lg:hover:underline lg:hover:decoration-1;
+}
+
+/* Style des liens secondaires dans le footer */
+.secondary-link {
+  @apply text-neutral-gray transition-all duration-200 ease-in-out;
+  @apply lg:hover:underline lg:hover:decoration-1;
+}
