@@ -35,6 +35,17 @@
   @apply lg:hover:bg-brand-primary/10;
 }
 
+/* Bouton secondaire noir */
+.black-btn {
+  @apply w-full bg-background-dark text-background-light text-center font-bold rounded-full 
+         border text-lg px-6 py-3
+         transition-all duration-200 ease-in-out
+         sm:px-10
+         md:px-14;
+  /* Hover limité au desktop */
+  @apply lg:hover:bg-neutral-dark;
+}
+
 /* Style des liens primaires */
 .primary-link {
   @apply text-brand-primary transition-all duration-200 ease-in-out;
@@ -45,4 +56,19 @@
 .secondary-link {
   @apply text-neutral-gray transition-all duration-200 ease-in-out;
   @apply lg:hover:underline lg:hover:decoration-1;
+}
+
+.input {
+  @apply w-full bg-background-light border rounded-md px-4 py-4 text-background-dark placeholder-brand-secondary outline-none transition-all duration-200 ease-in-out;
+}
+
+.input-error {
+  @apply border-state-error focus:border-state-error focus:ring-1 focus:ring-state-error;
+}
+.input-base {
+  @apply border-brand-secondary focus:border-brand-primary focus:ring-1 focus:ring-brand-primary;
+}
+
+.card-scroll {
+  scrollbar-gutter: stable;
 }

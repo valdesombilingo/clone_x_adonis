@@ -46,10 +46,10 @@ export default class AuthController {
   // =========================================================================
 
   async storeUser({ request, response, session }: HttpContext) {
-    try {
-      // 1. Validation des données
-      const validatedData = await request.validateUsing(storeUserValidator)
+    // 1. Validation des données
+    const validatedData = await request.validateUsing(storeUserValidator)
 
+    try {
       const {
         full_name: fullName,
         date_of_birth: dateOfBirth,
@@ -121,13 +121,6 @@ export default class AuthController {
       )
       return response.redirect().toRoute('verification_needed')
     } catch (error) {
-      if (error.status === 422) {
-        // Gestion des erreurs de validation
-        session.flashExcept(['password', 'password_confirmation'])
-        session.flash('errors', error.messages)
-        return response.redirect().back()
-      }
-
       // Gestion des erreurs critiques
       session.flash('error', 'Oups... Une erreur est survenue. Veuillez réessayer.')
       console.error(error)
@@ -236,7 +229,7 @@ export default class AuthController {
 
       session.flash(
         'success',
-        'Un nouveau lien de vérification vous a été envoyé. Il est valable 1 heure.'
+        'Un nouveau lien de vérification vous a été envoyé. Il est valable 24 heures.'
       )
       return response.redirect().toRoute('verification_needed')
     } catch (error) {

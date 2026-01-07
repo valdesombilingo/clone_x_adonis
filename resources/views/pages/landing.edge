@@ -1,144 +1,120 @@
+{{-- =========================== METADONNÉES HEAD =========================== --}}
+@include('partials/header')
 
-<!DOCTYPE html>
-<html lang="fr">
-  {{-- =========================== METADONNÉES =========================== --}}
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    {{-- SEO Dynamique --}}
-    <meta
-      name="description"
-      content="Bienvenue sur X Clone. Rejoignez la conversation, suivez l'actualité en temps réel et connectez-vous avec le monde entier"
+{{-- =========================== MAIN =========================== --}}
+<main
+  class="flex-grow flex flex-col sm:ml-32 lg:ml-0 lg:grid lg:grid-cols-2 lg:max-w-screen-xl lg:mx-auto w-full"
+>
+
+  {{-- PARTIE GAUCHE : Le Logo --}}
+  <div class="flex items-center justify-start p-8 lg:justify-end lg:p-12">
+    <img
+      src="/images/logos/x-social-media-white-icon.svg"
+      alt="Logo de X"
+      class="w-12 lg:w-full lg:max-w-xs"
     />
-    <title>
-      Bienvenue sur X (Clone)
-    </title>
+  </div>
 
-    {{-- Vite pour le CSS et JS --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+  {{-- PARTIE DROITE : Formulaire --}}
+  <section class="flex flex-col justify-center p-8 lg:p-16 lg:pl-12">
+    <h1 class="font-bold text-5xl sm:text-7xl lg:text-7xl tracking-tighter mb-12">
+      Ça se passe<br />
+      maintenant
+    </h1>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    />
-  </head>
+    <div class="max-w-xs w-full">
+      <h2 class="font-bold text-3xl lg:text-3xl mb-8">
+        Inscrivez-vous.
+      </h2>
 
-  {{-- =========================== CONTENU BODY =========================== --}}
-  <body class="bg-background-dark text-neutral-light font-sans antialiased min-h-screen flex flex-col">
-
-    {{-- =========================== MAIN =========================== --}}
-    <main
-      class="flex-grow flex flex-col sm:ml-32 lg:ml-0 lg:grid lg:grid-cols-2 lg:max-w-screen-xl lg:mx-auto w-full"
-    >
-
-      {{-- PARTIE GAUCHE : Le Logo --}}
-      <div class="flex items-center justify-start p-8 lg:justify-end lg:p-12">
-        <img
-          src="/images/logos/x-social-media-white-icon.svg"
-          alt="Logo de X"
-          class="w-12 lg:w-full lg:max-w-xs"
-        />
-      </div>
-
-      {{-- PARTIE DROITE : Formulaire --}}
-      <section class="flex flex-col justify-center p-8 lg:p-16 lg:pl-12">
-        <h1 class="font-bold text-5xl sm:text-7xl lg:text-7xl tracking-tighter mb-12">
-          Ça se passe<br />
-          maintenant
-        </h1>
-
-        <div class="max-w-xs w-full">
-          <h2 class="font-bold text-3xl lg:text-3xl mb-8">
-            Inscrivez-vous.
-          </h2>
-
-          {{-- Conteneur des boutons --}}
-          <div class="flex flex-col gap-3 w-full">
-            @component('components/buttons', {
+      {{-- Conteneur des boutons --}}
+      <div class="flex flex-col gap-3 w-full">
+        @component('components/buttons', {
                         type: 'social',
                         img: '/images/logos/google-icon.svg',
                         label: "S'inscrire avec Google"
-            })
-            @endcomponent
+        })
+        @endcomponent
                         
-            @component('components/buttons', {
+        @component('components/buttons', {
                         type: 'social',
                         img: '/images/logos/apple-icon.svg',
                         label: "S'inscrire avec Apple"
-            })
-            @endcomponent
+        })
+        @endcomponent
             
-            @component('components/separator')
-            @endcomponent
+        @component('components/separators')
+        @endcomponent
             
-            @component('components/buttons', { type: 'primary', label: 'Créer un compte' })
-            @endcomponent
+        @component('components/buttons', { type: 'primary', label: 'Créer un compte' })
+        @endcomponent
             
-            <p class="text-[11px] text-neutral-gray leading-tight mt-1">
-              En vous inscrivant, vous acceptez les
+        <p class="text-[11px] text-neutral-gray leading-tight mt-1">
+          En vous inscrivant, vous acceptez les
             <a href="#" class="primary-link">Conditions <br />d'utilisation</a>
-              et la
+          et la
             <a href="#" class="primary-link">Politique de confidentialité</a>, notamment <br />
-              l'<a href="#" class="primary-link">utilisation des cookies</a>.
-            </p>
-          </div>
+          l'<a href="#" class="primary-link">utilisation des cookies</a>.
+        </p>
+      </div>
 
-          <div class="mt-14 flex flex-col w-full">
-            <h3 class="font-bold text-lg mb-4">
-              Vous avez déjà un compte ?
-            </h3>
-            @component('components/buttons', { type: 'secondary', label: 'Se connecter' })
-            @endcomponent
-          </div>
-        </div>
-      </section>
+      <div class="mt-14 flex flex-col w-full">
+        <h3 class="font-bold text-lg mb-4">
+          Vous avez déjà un compte ?
+        </h3>
+        @component('components/buttons', { type: 'secondary', label: 'Se connecter' })
+        @endcomponent
+      </div>
+    </div>
+  </section>
 
-    </main>
+</main>
 
-    {{-- =========================== FOOTER =========================== --}}
-    <footer class="w-full py-4 px-6 border-t border-neutral-dark/30">
-      <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-center">
-        @component('components/links', { label: 'À propos' })
-        @endcomponent
-        @component('components/links', { label: 'Téléchargez l\'application X' })
-        @endcomponent
-        @component('components/links', { label: 'Grok' })
-        @endcomponent
-        @component('components/links', { label: 'Centre d\'assistance' })
-        @endcomponent
-        @component('components/links', { label: 'Conditions d\'utilisation' })
-        @endcomponent
-        @component('components/links', { label: 'Politique de Confidentialité' })
-        @endcomponent
-        @component('components/links', { label: 'Politique relative aux cookies' })
-        @endcomponent
-        @component('components/links', { label: 'Accessibilité' })
-        @endcomponent
-        @component('components/links', { label: 'Informations relatives aux publicités' })
-        @endcomponent
-        @component('components/links', { label: 'Blog' })
-        @endcomponent
-        @component('components/links', { label: 'Carrières' })
-        @endcomponent
-        @component('components/links', { label: 'Ressources de la marque' })
-        @endcomponent
-        @component('components/links', { label: 'Publicité' })
-        @endcomponent
-        @component('components/links', { label: 'Marketing' })
-        @endcomponent
-        @component('components/links', { label: 'X pour les professionnels' })
-        @endcomponent
-        @component('components/links', { label: 'Développeurs' })
-        @endcomponent
-        @component('components/links', { label: 'Actualités' })
-        @endcomponent
-        @component('components/links', { label: 'Paramètres' })
-        @endcomponent
-        <span class="text-neutral-gray">
-          © {{ new Date().getFullYear() }} X Corp.</span>
+{{-- =========================== FOOTER =========================== --}}
+<footer class="w-full py-4 px-6 border-t border-neutral-dark/30">
+  <nav class="flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs text-center">
+    @component('components/links', { label: 'À propos' })
+    @endcomponent
+    @component('components/links', { label: 'Téléchargez l\'application X' })
+    @endcomponent
+    @component('components/links', { label: 'Grok' })
+    @endcomponent
+    @component('components/links', { label: 'Centre d\'assistance' })
+    @endcomponent
+    @component('components/links', { label: 'Conditions d\'utilisation' })
+    @endcomponent
+    @component('components/links', { label: 'Politique de Confidentialité' })
+    @endcomponent
+    @component('components/links', { label: 'Politique relative aux cookies' })
+    @endcomponent
+    @component('components/links', { label: 'Accessibilité' })
+    @endcomponent
+    @component('components/links', { label: 'Informations relatives aux publicités' })
+    @endcomponent
+    @component('components/links', { label: 'Blog' })
+    @endcomponent
+    @component('components/links', { label: 'Carrières' })
+    @endcomponent
+    @component('components/links', { label: 'Ressources de la marque' })
+    @endcomponent
+    @component('components/links', { label: 'Publicité' })
+    @endcomponent
+    @component('components/links', { label: 'Marketing' })
+    @endcomponent
+    @component('components/links', { label: 'X pour les professionnels' })
+    @endcomponent
+    @component('components/links', { label: 'Développeurs' })
+    @endcomponent
+    @component('components/links', { label: 'Actualités' })
+    @endcomponent
+    @component('components/links', { label: 'Paramètres' })
+    @endcomponent
+    <span class="text-neutral-gray">
+      © {{ new Date().getFullYear() }} X Corp.</span>
 
-      </nav>
-    </footer>
+  </nav>
+</footer>
 
-  </body>
-</html>
+{{-- =========================== FOOTER =========================== --}}
+{{-- Ne contient que les balises de fermeture </body> et </html> --}}
+@include('partials/footer')

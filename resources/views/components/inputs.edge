@@ -1,0 +1,19 @@
+<div class="flex flex-col gap-1 w-full">
+  <input
+    type="{{ type || 'text' }}"
+    name="{{ name }}"
+    id="{{ name }}"
+    placeholder="{{ placeholder || '' }}"
+    class="input {{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'input-base' }}"
+    value="{{ old(name) || '' }}"
+    aria-describedby="{{ name }}-error"
+  />
+
+  @inputError(name)
+    @each(message in $messages)
+      <p id="{{ name }}-error" class="text-state-error text-xs ml-1">
+        {{ message }}
+      </p>
+    @end
+  @end
+</div>

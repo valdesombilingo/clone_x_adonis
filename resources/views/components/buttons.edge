@@ -1,6 +1,6 @@
 {{-- Bouton social (Google, Apple, etc.) --}}
 @if(type === 'social')
-  <button class="btn-social-auth">
+  <button type="{{ type_name || 'submit' }}" class="btn-social-auth">
     <img src="{{ img }}" class="icon-social-auth" />
     <span>{{ label }}</span>
   </button>
@@ -16,4 +16,10 @@
   <a href="{{ route('login') }}" class="secondary-btn">
     {{ label }}
   </a>
+
+  {{-- Bouton secondaire  noir --}}
+@elseif(type === 'black')
+  <button type="{{ type_name || 'submit' }}" class="black-btn">
+    {{ label }}
+  </button>
 @endif
