@@ -28,7 +28,7 @@
       </h2>
 
       {{-- Conteneur des boutons --}}
-      <div class="flex flex-col gap-3 w-full">
+      <div class="flex flex-col gap-4 w-full">
         @component('components/buttons', {
                         type: 'social',
                         img: '/images/logos/google-icon.svg',
@@ -42,8 +42,8 @@
                         label: "S'inscrire avec Apple"
         })
         @endcomponent
-            
-        @component('components/separators')
+        
+        @component('components/separators', { type: 'dark-mode' })
         @endcomponent
             
         @component('components/buttons', { type: 'primary', label: 'Créer un compte' })

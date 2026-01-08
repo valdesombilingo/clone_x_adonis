@@ -18,8 +18,8 @@ export default {
         neutral: {
           dark: '#3A3B3B', // gris très foncé 4C4E4E
           gray: '#71767B', // gris standard
-          light: '#DFDEDE', // gris clair
-          lightBlue: '#E1E8ED', // gris bleuté clair
+          light: '#DEDEDF', // gris clair
+          lightBlue: '#C7D4DD', // gris bleuté clair E1E8ED
           offWhite: '#F3F4F6', // blanc cassé
         },
 

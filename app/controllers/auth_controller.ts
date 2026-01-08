@@ -48,7 +48,6 @@ export default class AuthController {
   async storeUser({ request, response, session }: HttpContext) {
     // 1. Validation des données
     const validatedData = await request.validateUsing(storeUserValidator)
-
     try {
       const {
         full_name: fullName,
@@ -133,36 +132,25 @@ export default class AuthController {
   // =========================================================================
 
   async authenticate({ request, response, auth, session }: HttpContext) {
+    // 1. Validation (Laisser Adonis gérer l'exception de validation)
     const { email, password } = await request.validateUsing(authenticateValidator)
 
     try {
-      // 1. Recherche de l'utilisateur
-      const user = await User.query().where('email', email).firstOrFail()
+      // 2. Vérification simplifiée via la méthode statique du modèle User
+      const user = await User.verifyCredentials(email, password)
 
-      // 2. Vérification du mot de passe
-      const isValid = await Hash.verify(user.password, password)
-      if (!isValid) {
-        session.flash('error', 'Email ou mot de passe incorrect.')
-        return response.redirect().back()
-      }
-
-      // 3. Blocage si non vérifié
+      // 3. Vérification email
       if (!user.isEmailVerified) {
-        session.flash('error', 'Veuillez vérifier votre email avant de vous connecter.')
+        session.flash('error', 'Veuillez vérifier votre email.')
         return response.redirect().toRoute('verification_needed')
       }
 
       // 4. Connexion
       await auth.use('web').login(user)
-      console.log('auth.check après login:', await auth.check())
-
-      // 5. Redirection avec message de succès
-      session.flash('success', `Bienvenue, ${user.fullName} !`)
       return response.redirect().toRoute('home')
-    } catch {
-      // Gestion des erreurs (utilisateur introuvable, etc.)
-      session.flashExcept(['password'])
-      session.flash('error', 'Email ou mot de passe incorrect.')
+    } catch (error) {
+      // catch uniquement l'échec de credentials
+      session.flash('error', 'Email ou mot de passe invalide.')
       return response.redirect().back()
     }
   }

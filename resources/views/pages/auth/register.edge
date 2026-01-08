@@ -1,17 +1,16 @@
-@let(title = 'Créer votre compte / X')
-@let(description = 'Inscrivez-vous sur X Clone pour ne rien rater.')
-{{-- Correction : items-start + py-4 pour mobile, items-center pour desktop --}}
+@let(title = 'Créer votre compte X (Clone)')
+@let(description = 'Inscrivez-vous sur X (Clone) pour ne rien rater.')
 @let(body_class = 'bg-background-dark text-neutral-light font-sans antialiased min-h-screen flex items-start sm:items-center justify-center py-4 sm:py-0')
 
 @include('partials/header')
 
 <main class="w-full max-w-[40rem] p-4">
   {{-- Card Blanche : h-auto sur mobile pour éviter de couper le contenu --}}
-  <div class="bg-background-light rounded-2xl shadow-2xl overflow-hidden w-full">
+  <div class="bg-background-light rounded-xl overflow-hidden w-full">
 
     {{-- Container interne --}}
     <div
-      class="h-full rounded-2xl py-6 px-6 sm:py-8 sm:px-12 lg:px-20 lg:max-h-[520px] lg:overflow-y-auto"
+      class="h-full rounded-2xl py-6 px-6 sm:py-8 sm:px-12 lg:px-20 lg:max-h-[520px] sm:overflow-y-auto"
     >
 
       {{-- Logo --}}
@@ -23,83 +22,9 @@
         Créer votre compte
       </h1>
 
-      {{-- Bloc global si besoin --}}
-      @if(flashMessages.has('error'))
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {{ flashMessages.get('error') }}
-        </div>
-      @endif
-      
-      @if(flashMessages.has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {{ flashMessages.get('success') }}
-        </div>
-      @endif
-      
-      <form action="{{ route('store_user') }}" method="POST" class="space-y-4 sm:space-y-6">
-        {{ csrfField() }}
-        {{-- Nom complet --}}
-        @component('components/inputs', {
-          name: 'full_name',
-          placeholder: 'Prénom et Nom'
-        })
-        @endcomponent
-        
-        {{-- Email --}}
-        @component('components/inputs', {
-          name: 'email',
-          type: 'email',
-          placeholder: 'Email'
-        })
-        @endcomponent
-        
-        {{-- Date de naissance --}}
-        <div class="space-y-2 sm:space-y-3">
-          <h2 class="text-neutral-dark text-lg font-bold text-left">
-            Date de naissance
-          </h2>
-          <p class="text-neutral-gray text-sm leading-tight mb-2">
-            Cette information ne sera pas affichée publiquement. Confirmez votre âge, même si ce compte est pour une entreprise ou un animal de compagnie.
-          </p>
-          @component('components/inputs', {
-            name: 'date_of_birth',
-            type: 'date'
-          })
-          @endcomponent
-        </div>
+      {{-- Formulaire d'inscription --}}
+      @include('partials/store_user_form')
 
-        {{-- Mot de passe --}}
-        <div class="space-y-4 pt-4 sm:pt-8">
-          <h2 class="text-neutral-dark text-lg font-bold text-left">
-            Mot de passe
-          </h2>
-          <p class="text-neutral-gray text-sm leading-tight">
-            Le mot de passe doit contenir entre 8 et 32 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial (par exemple : Kadea_2026!).
-          </p>
-
-          @component('components/inputs', {
-            name: 'password',
-            type: 'password',
-            placeholder: 'Mot de passe (8 caractères minimum)'
-          })
-          @endcomponent
-          
-          @component('components/inputs', {
-            name: 'password_confirmation',
-            type: 'password',
-            placeholder: 'Confirmer le mot de passe'
-          })
-          @endcomponent
-        </div>
-
-        <div class="pt-4 sm:pt-6">
-          @component('components/buttons', {
-            type: 'black',
-            label: "Suivant"
-          })
-          @endcomponent
-        </div>
-      </form>
     </div>
   </div>
 </main>

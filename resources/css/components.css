@@ -1,12 +1,12 @@
 /* Bouton social (Google, Apple, etc.) */
 .btn-social-auth {
-  @apply bg-background-light text-neutral-dark font-medium rounded-full 
-         border border-background-light flex items-center justify-center gap-2 
+  @apply bg-background-light text-neutral-dark font-normal rounded-full 
+         border border-neutral-lightBlue flex items-center justify-center gap-2 
          text-base px-6 py-2 
          transition-all duration-200 ease-in-out
          sm:px-10
          md:px-14;
-  @apply lg:hover:bg-neutral-light lg:hover:border-neutral-light;
+  @apply lg:hover:bg-blue-50 lg:hover:border-blue-200;
 }
 
 /* Icônes svg des boutons sociaux */
@@ -27,23 +27,34 @@
 /* Bouton secondaire (Se connecter) */
 .secondary-btn {
   @apply bg-transparent text-background-light text-center font-semibold rounded-full 
-         border text-base px-6 py-2 
+         border border-brand-secondary text-base px-6 py-2 
          transition-all duration-200 ease-in-out
          sm:px-10
          md:px-14;
   /* Hover limité au desktop */
-  @apply lg:hover:bg-brand-primary/10;
+  @apply lg:hover:bg-neutral-dark/50 lg:hover:border-brand-secondary;
 }
 
 /* Bouton secondaire noir */
 .black-btn {
   @apply w-full bg-background-dark text-background-light text-center font-bold rounded-full 
-         border text-lg px-6 py-3
+         border border-background-dark text-base px-6 py-2
          transition-all duration-200 ease-in-out
          sm:px-10
          md:px-14;
   /* Hover limité au desktop */
-  @apply lg:hover:bg-neutral-dark;
+  @apply lg:hover:bg-neutral-dark lg:hover:border-neutral-dark;
+}
+
+/* Bouton secondaire blanc */
+.white-btn {
+  @apply w-full bg-background-light text-background-dark text-center font-bold rounded-full 
+         border border-neutral-lightBlue text-base px-6 py-2
+         transition-all duration-200 ease-in-out
+         sm:px-10
+         md:px-14;
+  /* Hover limité au desktop */
+  @apply lg:hover:bg-neutral-light lg:hover:border-neutral-light;
 }
 
 /* Style des liens primaires */
@@ -66,7 +77,7 @@
   @apply border-state-error focus:border-state-error focus:ring-1 focus:ring-state-error;
 }
 .input-base {
-  @apply border-brand-secondary focus:border-brand-primary focus:ring-1 focus:ring-brand-primary;
+  @apply border-neutral-lightBlue focus:border-brand-primary focus:ring-1 focus:ring-brand-primary;
 }
 
 .card-scroll {

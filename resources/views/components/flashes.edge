@@ -1,0 +1,7 @@
+{{-- NOTE : Ce composant permet dafficher des messages flash d'erreur globaux. --}}
+
+@if(flashMessages.has('error'))
+  <div class="bg-state-error/10 border border-state-error/40 text-red-700 px-4 py-3 rounded mb-4">
+    {{ flashMessages.get('error') }}
+  </div>
+@endif

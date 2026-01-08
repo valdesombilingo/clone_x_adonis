@@ -1,0 +1,63 @@
+{{-- Bloc global d'erreur --}}
+@component('components/flashes')
+@endcomponent
+                
+
+<div class="flex flex-col gap-3 w-full">
+  @component('components/buttons', {
+                        type: 'social',
+                        img: '/images/logos/google-icon.svg',
+                        label: "Se connecter avec Google"
+  })
+  @endcomponent
+                        
+  @component('components/buttons', {
+                        type: 'social',
+                        img: '/images/logos/apple-icon.svg',
+                        label: "Se connecter avec Apple"
+  })
+  @endcomponent
+        
+  @component('components/separators', { type: 'light-mode' })
+  @endcomponent
+</div>
+
+<form action="{{ route('authenticate') }}" method="POST" class="mt-4 flex flex-col gap-4">
+  {{ csrfField() }}
+  {{-- Email --}}
+  @component('components/inputs', {
+          name: 'email',
+          type: 'email',
+          placeholder: 'Entrez votre adresse email'
+  })
+  @endcomponent
+          
+  {{-- Mot de passe --}}
+  @component('components/inputs', {
+            name: 'password',
+            type: 'password',
+            placeholder: 'Entrez votre mot de passe'
+  })
+  @endcomponent
+          
+          
+  <div class="pt-4 sm:pt-6 flex flex-col items-center gap-4">
+    {{-- Bouton Suivant --}}
+    @component('components/buttons', {
+            type: 'black',
+            label: "Suivant"
+    })
+    @endcomponent
+          
+    <a href="{{ route('show_forgot_password') }}" class="white-btn
+          group: 'input-base',">
+      Mot de passe oublié ?
+          </a>
+
+    {{-- Lien vers l'inscription --}}
+    <p class="text-brand-secondary text-sm mt-8 mb-2">
+      Vous n'avez pas de compte ? <a href="{{ route('register') }}" class="primary-link">Inscrivez-vous</a>
+    </p>
+
+  </div>
+</form>
