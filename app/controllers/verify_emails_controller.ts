@@ -11,36 +11,33 @@ export default class VerifyEmailsController {
    * handleVerification
    * Traite le clic sur le lien de confirmation envoyé par email.
    */
-  async handleVerification({ params, response, session, auth }: HttpContext) {
-    // 1. Récupération du token depuis l'URL
+  async handleVerification({ params, response, session }: HttpContext) {
     const token = params.token
 
-    // 2. Recherche de l'utilisateur associé à ce jeton
+    // 1. Recherche de l'utilisateur
     const user = await User.query().where('emailVerificationToken', token).first()
 
-    // 3. Gestion du cas où le jeton n'existe pas ou est invalide
+    // 2. Gestion Jeton Invalide (Redirection vers Login)
     if (!user) {
-      session.flash('error', 'Lien invalide ou utilisateur introuvable.')
-      return response.redirect().toRoute('register')
+      session.flash('error', 'Ce lien de vérification est invalide.')
+      return response.redirect().toRoute('login')
     }
 
-    // 4. Vérification de l'expiration du jeton (Sécurité accrue)
+    // 3. Gestion Jeton Expiré
     if (user.emailTokenExpiresAt && DateTime.now() > user.emailTokenExpiresAt) {
-      session.flash('error', 'Lien expiré. Veuillez demander un nouveau lien.')
+      session.flash('error', 'Le lien a expiré. Veuillez en demander un nouveau.')
       return response.redirect().toRoute('verification_needed')
     }
 
-    // 5. Mise à jour du statut de l'utilisateur
+    // 4. Validation du compte et nettoyage COMPLET
     user.isEmailVerified = true
     user.emailVerifiedAt = DateTime.now()
     user.emailVerificationToken = null
+    user.emailTokenExpiresAt = null
     await user.save()
 
-    // 6. Connexion automatique de l'utilisateur
-    await auth.use('web').login(user)
-
-    // 7. Notification de succès et redirection home
-    session.flash('success', `Votre email a été confirmé. Bienvenue ${user.fullName} !`)
-    return response.redirect().toRoute('home')
+    // 5. Succès et redirection vers Login (Plus sécurisé que l'auto-login)
+    session.flash('success', 'Email confirmé avec succès ! Vous pouvez maintenant vous connecter.')
+    return response.redirect().toRoute('login')
   }
 }

@@ -1,65 +1,31 @@
+@let(title = 'Vérifiez votre adresse email X (Clone)')
+@let(description = 'Vérifiez votre adresse X (Clone) en toute simplicité.')
+@let(body_class = 'bg-background-dark text-neutral-light font-sans antialiased min-h-screen flex items-start sm:items-center justify-center py-4 sm:py-0')
 
-<!DOCTYPE html>
-<html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-      Vérification requise
-    </title>
-    <!-- Lien vers Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com">
+@include('partials/header')
 
-    </script>
-  </head>
-  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white shadow-md rounded-lg p-8 max-w-md w-full">
-      <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">
-        Vérification de votre email
+<main class="w-full max-w-[40rem] p-4">
+  {{-- Card Blanche : h-auto sur mobile pour éviter de couper le contenu --}}
+  <div class="bg-background-light rounded-xl overflow-hidden w-full">
+
+    {{-- Container interne --}}
+    <div
+      class="h-full rounded-2xl py-6 px-6 sm:py-8 sm:px-12 lg:px-20 lg:max-h-[520px] sm:overflow-y-auto"
+    >
+
+      {{-- Logo --}}
+      <div class="flex justify-center mb-4 sm:mb-6">
+        <img src="/images/logos/x-social-media-dark-icon.svg" class="w-8" alt="Logo" />
+      </div>
+
+      <h1 class="text-background-dark text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-left">
+        Vérification de votre adresse email
       </h1>
 
-      <!-- Message d'erreur -->
-      @if(session.has('error'))
-        <p class="text-red-600 text-sm mb-4">
-          {{ session.get('error') }}
-        </p>
-      @endif
-      
-      @if(flashMessages.has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          {{ flashMessages.get('success') }}
-        </div>
-      @endif
-      
-      <!-- Message de succès -->
-      @if(session.has('success'))
-        <p class="text-green-600 text-sm mb-4">
-          {{ session.get('success') }}
-        </p>
-      @endif
-      
-      <p class="text-gray-700 mb-6">
-        Votre compte n’est pas encore confirmé. Vérifiez votre boîte mail.
-      </p>
-
-      <!-- Bouton pour renvoyer le mail -->
-      <form action="{{ route('resend_verification') }}" method="post" class="mb-6">
-        {{ csrfField() }}
-        <input type="hidden" name="email" value="{{ old('email') }}" />
-        <button
-          type="submit"
-          class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-        >
-          Renvoyer le mail de vérification
-        </button>
-      </form>
-
-      <p class="text-gray-600 text-sm text-center">
-        Si vous avez déjà confirmé votre email,
-        <a href="{{ route('login') }}" class="text-blue-600 hover:underline">
-          connectez-vous ici
-        </a>.
-      </p>
+      {{-- Formulaire d'inscription --}}
+      @include('partials/verify_required_form')
     </div>
-  </body>
-</html>
+  </div>
+</main>
+
+@include('partials/footer')

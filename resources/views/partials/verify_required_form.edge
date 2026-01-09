@@ -1,0 +1,30 @@
+{{-- Block message global --}}
+@component('components/flashes', { type: 'error' })
+@end
+@component('components/flashes', { type: 'success' })
+@end
+      
+<form
+  action="{{ route('resend_verification') }}"
+  method="POST"
+  novalidate
+  class="space-y-4 sm:space-y-6"
+>
+  {{ csrfField() }}
+  <div class="space-y-2 sm:space-y-3 xs:pb-60 sm:pb-[4rem]">
+    <p class="text-brand-secondary text-sm mb-2">
+      Pas d'email réçu ? Vérifiez vos spams ou l'onglet promotions. Sinon, vous pouvez renvoyer un lien dans 1 minute.
+    </p>
+    <input type="hidden" name="email" value="{{ session.get('verification_email') }}" />
+
+  </div>
+
+  <div class="pt-4  sm:pt-6">
+    <button type="submit" class="white-btn">Renvoyer le lien de vérification</button>
+    {{-- Lien vers l'inscription --}}
+    <p class="text-brand-secondary text-center text-sm mt-14 mb-2">
+      Vous avez déjà confirmé votre email ? <a href="{{ route('login') }}" class="primary-link">Connectez-vous</a>
+    </p>
+  </div>
+
+</form>

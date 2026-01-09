@@ -5,40 +5,40 @@ import mail from '@adonisjs/mail/services/main'
 import env from '#start/env'
 import crypto from 'node:crypto'
 import { DateTime } from 'luxon'
-
-/**
- * Contrôleur pour la gestion des réinitialisations de mot de passe
- * - Affichage du formulaire Mot de passe oublié 'showForgotPasswordForm'
- * - Véification de l'email 'forgotPassword'
- * - Affichage du formulaire de réinitialisation 'showResetPasswordForm'
- * - Réinitialisation du mot de passe 'resetPassword'
- */
-
+import { forgotPasswordValidator } from '#validators/forgot_password'
+import { resetPasswordValidator } from '#validators/reset_password'
 export default class PasswordResetsController {
+  /**
+   * NOTE :  Contrôleur pour la gestion des réinitialisations de mot de passe
+   * - Affichage du formulaire Mot de passe oublié 'showForgotPasswordForm'
+   * - Véification de l'email 'forgotPassword'
+   * - Affichage du formulaire de réinitialisation 'showResetPasswordForm'
+   * - Réinitialisation du mot de passe 'resetPassword'
+   */
+
   // =========================================================================
   // Mot de passe oublié 'forgotPassword'
   // =========================================================================
 
-  // 1. Affiche la page "Mot de passe oublié" (showForgotPasswordForm)
+  // 1. Affiche la page "Mot de passe oublié"
+
   async showForgotPasswordForm({ view }: HttpContext) {
     return view.render('pages/auth/forgot_password')
   }
 
-  // 2. Traite la demande et envoie l'email
+  //  2. Traite la demande et envoie l'email
   async forgotPassword({ request, response, session }: HttpContext) {
-    const email = request.input('email')
-    const user = await User.query().where('email', email).first()
+    // Validation du format de l'email
+    const { email } = await request.validateUsing(forgotPasswordValidator)
 
-    if (!user) {
-      session.flash('error', 'Aucun compte trouvé avec cet email.')
-      return response.redirect().back()
-    }
+    const user = await User.findBy('email', email)
 
-    try {
-      // Nettoyage des anciens tokens
+    if (user) {
+      // Nettoyage des anciens jetons
       await PasswordReset.query().where('userId', user.id).delete()
 
       const resetToken = crypto.randomBytes(60).toString('hex')
+
       await PasswordReset.create({
         userId: user.id,
         token: resetToken,
@@ -54,59 +54,66 @@ export default class PasswordResetsController {
           .subject('Réinitialisation de votre mot de passe')
           .htmlView('emails/reset_password_email', { user, resetUrl })
       })
-
-      session.flash('success', 'Un email de réinitialisation vous a été envoyé.')
-      return response.redirect().toRoute('login')
-    } catch (error) {
-      session.flash('error', 'Erreur technique. Réessayez plus tard.')
-      return response.redirect().back()
     }
+
+    // Message flash (UX sécurisée)
+    session.flash(
+      'success',
+      'Lien de réinitialisation envoyé. Veuillez vérifier vos emails ou vos spams.'
+    )
+    return response.redirect().toRoute('login')
   }
 
   // =========================================================================
   // Réinitialisation du mot de passe 'resetPassword'
   // =========================================================================
 
-  // 1. Affiche le formulaire de réinitialisation du mot de passe (showResetPasswordForm)
+  // 3. Affiche le formulaire de réinitialisation
   async showResetPasswordForm({ view, params, session, response }: HttpContext) {
     const token = params.token
-    const record = await PasswordReset.query().where('token', token).first()
 
-    if (!record || DateTime.now() > record.expiresAt) {
-      session.flash('error', 'Lien invalide ou expiré.')
+    // Vérification de la validité du jeton en base
+    const record = await PasswordReset.query()
+      .where('token', token)
+      .where('expiresAt', '>', DateTime.now().toSQL())
+      .first()
+
+    if (!record) {
+      session.flash('error', 'Le lien de réinitialisation est invalide ou a expiré.')
       return response.redirect().toRoute('show_forgot_password')
     }
 
     return view.render('pages/auth/reset_password', { token })
   }
 
-  // 2. Enregistre le nouveau mot de passe en base
+  // 4. Enregistre le nouveau mot de passe
   async resetPassword({ request, response, session }: HttpContext) {
-    const { token, password, confirmPassword } = request.only([
-      'token',
-      'password',
-      'confirmPassword',
-    ])
+    // Validation (vérifie la présence du token et la confirmation du mot de passe)
+    const { token, password } = await request.validateUsing(resetPasswordValidator)
 
-    const record = await PasswordReset.query().where('token', token).first()
-    if (!record || DateTime.now() > record.expiresAt) {
-      session.flash('error', 'Lien expiré.')
-      return response.redirect().toRoute('forgotPassword')
+    // Recherche du jeton valide
+    const record = await PasswordReset.query()
+      .where('token', token)
+      .where('expiresAt', '>', DateTime.now().toSQL())
+      .first()
+
+    if (!record) {
+      session.flash('error', 'La session de réinitialisation a expiré.')
+      return response.redirect().toRoute('show_forgot_password')
     }
 
+    // Récupération de l'utilisateur et mise à jour
     const user = await User.findOrFail(record.userId)
-
-    if (password !== confirmPassword) {
-      session.flash('error', 'Les mots de passe ne correspondent pas.')
-      return response.redirect().back()
-    }
-
-    // Mise à jour du user
     user.password = password
     await user.save()
+
+    // Suppression du jeton utilisé
     await record.delete()
 
-    session.flash('success', 'Mot de passe modifié avec succès.')
+    session.flash(
+      'success',
+      'Votre mot de passe a été modifié avec succès. Vous pouvez vous connecter.'
+    )
     return response.redirect().toRoute('login')
   }
 }

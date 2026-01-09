@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
-import Hash from '@adonisjs/core/services/hash'
+import router from '@adonisjs/core/services/router'
+import env from '#start/env'
 import { DateTime } from 'luxon'
 import { storeUserValidator } from '#validators/store_user'
 import { authenticateValidator } from '#validators/auth'
@@ -98,8 +99,12 @@ export default class AuthController {
       })
 
       // 6. Envoi du mail de vérification
+
+      const verificationUrl = router.makeUrl('verify_email', [user.emailVerificationToken], {
+        prefixUrl: env.get('APP_URL'),
+      })
+      session.put('verification_email', user.email)
       try {
-        const verificationUrl = `http://localhost:3333/verify-email/${user.emailVerificationToken}`
         await mail.send((message) => {
           message
             .to(user.email)
@@ -109,7 +114,7 @@ export default class AuthController {
         })
       } catch (mailError) {
         console.error('Erreur lors de l’envoi du mail :', mailError)
-        session.flash('error', 'Erreur lors de l’envoi du mail. Vérifiez la configuration SMTP.')
+        session.flash('error', 'Erreur lors de l’envoi du mail.')
         return response.redirect().back()
       }
 
@@ -141,6 +146,7 @@ export default class AuthController {
 
       // 3. Vérification email
       if (!user.isEmailVerified) {
+        session.put('verification_email', user.email)
         session.flash('error', 'Veuillez vérifier votre email.')
         return response.redirect().toRoute('verification_needed')
       }
@@ -169,61 +175,61 @@ export default class AuthController {
   // Renvoyer un nouveau mail de vérification 'resendEmailVerification'
   // =========================================================================
 
-  async resendEmailVerification({ request, response, session }: HttpContext) {
-    try {
-      const email = request.input('email')
+  async resendEmailVerification({ response, session }: HttpContext) {
+    // CORRECT : On récupère l'email depuis la session (fiable et déchiffré automatiquement)
+    const email = session.get('verification_email')
 
-      // 1. Vérifier si l’utilisateur existe
-      const user = await User.query().where('email', email).first()
-      if (!user) {
-        session.flash('error', 'Aucun compte trouvé avec cet email.')
-        return response.redirect().toRoute('login')
-      }
-
-      // 2. Vérifier si déjà validé
-      if (user.isEmailVerified) {
-        session.flash('success', 'Votre email est déjà confirmé. Connectez-vous directement.')
-        return response.redirect().toRoute('login')
-      }
-
-      // 3. Vérifier si le lien est expiré ou invalide
-      const now = DateTime.now()
-      if (user.emailTokenExpiresAt && now < user.emailTokenExpiresAt) {
-        session.flash('error', 'Votre lien est encore valide. Vérifiez votre boîte mail.')
-        return response.redirect().toRoute('verification_needed')
-      }
-
-      // 4. Générer un nouveau token valable 24h
-      const newToken = crypto.randomBytes(60).toString('hex')
-      user.emailVerificationToken = newToken
-      user.emailTokenExpiresAt = DateTime.now().plus({ hours: 24 })
-      await user.save()
-
-      // 5. Renvoi du mail de vérification
-      try {
-        const verificationUrl = `http://localhost:3333/verify-email/${user.emailVerificationToken}`
-        await mail.send((message) => {
-          message
-            .to(user.email)
-            .from('no-reply@tonapp.com')
-            .subject('Confirmez votre adresse email')
-            .htmlView('emails/verify_email', { user, verificationUrl })
-        })
-      } catch (mailError) {
-        console.error('Erreur lors de l’envoi du mail :', mailError)
-        session.flash('error', 'Erreur lors de l’envoi du mail. Vérifiez la configuration SMTP.')
-        return response.redirect().back()
-      }
-
-      session.flash(
-        'success',
-        'Un nouveau lien de vérification vous a été envoyé. Il est valable 24 heures.'
-      )
-      return response.redirect().toRoute('verification_needed')
-    } catch (error) {
-      console.error(error)
-      session.flash('error', 'Impossible de renvoyer le lien. Veuillez réessayer.')
-      return response.redirect().toRoute('verification_needed')
+    // 1. Trouver l'utilisateur
+    // Si la session est vide (ex: l'utilisateur a fermé son onglet), on redirige au login
+    if (!email) {
+      session.flash('error', 'Session expirée. Veuillez saisir à nouveau vos identifiants.')
+      return response.redirect().toRoute('login')
     }
+
+    const user = await User.findBy('email', email)
+
+    // Sécurité : On ne révèle pas si l'email existe ou non
+    if (!user) {
+      session.flash('success', 'Si ce compte existe, un nouveau lien a été envoyé.')
+      return response.redirect().toRoute('login')
+    }
+
+    // 2. Vérifier si déjà validé
+    if (user.isEmailVerified) {
+      session.flash('success', 'Votre email est déjà confirmé. Vous pouvez vous connecter.')
+      return response.redirect().toRoute('login')
+    }
+
+    // 3. Vérification du délai (1 minute)
+    const now = DateTime.now()
+    // Correction de la logique : si 'now' est avant le moment autorisé (création + 23h59)
+    const canResendAt = user.emailTokenExpiresAt?.minus({ hours: 23, minutes: 59 })
+    if (canResendAt && now < canResendAt) {
+      session.flash('error', 'Veuillez patienter 1 minute avant de demander un nouveau lien.')
+      return response.redirect().back()
+    }
+
+    // 4. Générer le nouveau token
+    const newToken = crypto.randomBytes(60).toString('hex')
+    user.emailVerificationToken = newToken
+    user.emailTokenExpiresAt = DateTime.now().plus({ hours: 24 })
+    await user.save()
+
+    // 5. Générer l'URL proprement via le Router
+    const verificationUrl = router.makeUrl('verify_email', [user.emailVerificationToken], {
+      prefixUrl: env.get('APP_URL'),
+    })
+
+    // 6. Envoi du mail
+    await mail.send((message) => {
+      message
+        .to(user.email)
+        .from('no-reply@tonapp.com')
+        .subject('Confirmez votre adresse email')
+        .htmlView('emails/verify_email', { user, verificationUrl })
+    })
+
+    session.flash('success', 'Un nouveau lien de vérification vous a été envoyé.')
+    return response.redirect().toRoute('verification_needed')
   }
 }
