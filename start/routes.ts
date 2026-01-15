@@ -65,7 +65,17 @@ router
 
 // Routes protégées (connexion et email validé obligatoire)
 router
+  // 1. Route home, accueil
   .group(() => {
     router.get('/home', [HomeController, 'index']).as('home')
+
+    // 2. Route pour les recherches d'utilisateurs et hashtags
+    router.get('/search', [HomeController, 'search']).as('search')
+
+    // 3. Route pour les notifications
+    router.get('/notifications', [HomeController, 'notifications']).as('notifications')
+
+    // 4. Route pour l'affichage du profil utilisateur
+    router.get('/profile', [HomeController, 'profile']).as('show_profile')
   })
   .use([middleware.auth(), middleware.emailVerified()])

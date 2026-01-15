@@ -1,0 +1,100 @@
+{{-- =========================== LEFT SIDE =========================== --}}
+<main class="flex min-h-screen max-w-7xl mx-auto">
+
+  {{-- 1. Barre latérale gauche (Navigation Desktop & Tablette) --}}
+  <aside
+    class="hidden sm:flex flex-col w-20 lg:w-64 sticky top-0 h-screen p-4 border-r border-neutral-dark"
+  >
+    <div class="flex flex-col h-full justify-between">
+      <div class="flex flex-col gap-3 items-center lg:items-start">
+        {{-- Logo --}}
+        <a
+          href="{{ route('home') }}"
+          class="text-2xl hover:bg-neutral-dark/40 py-2 px-3 rounded-full transition"
+        >
+          <i class="fa-brands fa-x-twitter text-background-ligth"></i>
+        </a>
+
+        {{-- Navigation --}}
+        <nav class="flex flex-col gap-1 w-full">
+
+          {{-- Accueil --}}
+          <a
+            href="{{ route('home') }}"
+            class="flex items-center gap-4 py-2 px-3 rounded-full hover:bg-neutral-dark/40 text-lg font-bold"
+          >
+            <i class="fa-solid fa-house"></i>
+            <span class="hidden lg:inline">Accueil</span>
+          </a>
+
+          <a
+            href="#"
+            class="flex items-center gap-4 py-2 px-3 rounded-full hover:bg-neutral-dark/40 text-lg text-neutral-light"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span class="hidden lg:inline">Explorer</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-4 py-2 px-3 rounded-full hover:bg-neutral-dark/40 text-lg text-neutral-light"
+          >
+            <i class="fa-solid fa-bell"></i>
+            <span class="hidden lg:inline">Notifications</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-4 py-2 px-3 rounded-full hover:bg-neutral-dark/40 text-lg text-neutral-light"
+          >
+            <i class="fa-solid fa-envelope"></i>
+            <span class="hidden lg:inline">Messages</span>
+          </a>
+          <a
+            href="#"
+            class="flex items-center gap-4 py-2 px-3 rounded-full hover:bg-neutral-dark/40 text-lg text-neutral-light"
+          >
+            <i class="fa-solid fa-user"></i>
+            <span class="hidden lg:inline">Profil</span>
+          </a>
+        </nav>
+
+        {{-- Bouton Poster Desktop --}}
+        <button
+          class="bg-brand-primary hover:bg-brand-hoverPrimary text-white font-bold py-3 mt-4 rounded-full w-full hidden lg:block transition shadow-sm"
+        >
+          Poster
+        </button>
+        {{-- Version icône pour tablettes --}}
+        <button
+          class="bg-brand-primary hover:bg-brand-hoverPrimary text-white w-12 h-12 rounded-full flex lg:hidden items-center justify-center transition shadow-sm mt-2"
+        >
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+
+      {{-- Profil & Déconnexion (Bas de sidebar) --}}
+      <div class="mb-4">
+        <form action="{{ route('logout') }}" method="POST">
+          {{ csrfField() }}
+          <button
+            type="submit"
+            class="flex items-center gap-3 p-3 rounded-full hover:bg-neutral-dark w-full transition text-left"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-brand-primary flex items-center justify-center font-bold flex-shrink-0 text-white text-sm"
+            >
+              {{ auth.user.fullName.slice(0, 2).toUpperCase() }}
+            </div>
+            <div class="hidden lg:block overflow-hidden">
+              <p class="font-bold text-sm truncate">
+                {{ auth.user.fullName }}
+              </p>
+              <p class="text-neutral-gray text-xs truncate">
+                {{ auth.user.userName }}
+              </p>
+            </div>
+            <i class="fa-solid fa-ellipsis ml-auto hidden lg:block text-neutral-gray text-xs"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>

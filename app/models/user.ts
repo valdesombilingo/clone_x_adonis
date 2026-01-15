@@ -38,6 +38,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare avatarUrl: string | null
 
+  get avatar() {
+    return this.avatarUrl || '/images/backgrounds/default-profile-avatar.png'
+  }
+
   @column()
   declare bannerImage: string | null
 

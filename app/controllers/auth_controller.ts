@@ -121,7 +121,7 @@ export default class AuthController {
       // 7. Message flash de succès et Redirection
       session.flash(
         'success',
-        'Inscription réussie. Vérifiez votre boîte mail pour valider votre compte.'
+        'Inscription réussie. Veuillez vérifier votre boîte mail pour valider votre compte.'
       )
       return response.redirect().toRoute('verification_needed')
     } catch (error) {
@@ -155,7 +155,6 @@ export default class AuthController {
       await auth.use('web').login(user)
       return response.redirect().toRoute('home')
     } catch (error) {
-      // catch uniquement l'échec de credentials
       session.flash('error', 'Email ou mot de passe invalide.')
       return response.redirect().back()
     }
@@ -176,11 +175,10 @@ export default class AuthController {
   // =========================================================================
 
   async resendEmailVerification({ response, session }: HttpContext) {
-    // CORRECT : On récupère l'email depuis la session (fiable et déchiffré automatiquement)
+    // On récupère l'email depuis la session
     const email = session.get('verification_email')
 
     // 1. Trouver l'utilisateur
-    // Si la session est vide (ex: l'utilisateur a fermé son onglet), on redirige au login
     if (!email) {
       session.flash('error', 'Session expirée. Veuillez saisir à nouveau vos identifiants.')
       return response.redirect().toRoute('login')
@@ -188,7 +186,6 @@ export default class AuthController {
 
     const user = await User.findBy('email', email)
 
-    // Sécurité : On ne révèle pas si l'email existe ou non
     if (!user) {
       session.flash('success', 'Si ce compte existe, un nouveau lien a été envoyé.')
       return response.redirect().toRoute('login')
@@ -202,7 +199,6 @@ export default class AuthController {
 
     // 3. Vérification du délai (1 minute)
     const now = DateTime.now()
-    // Correction de la logique : si 'now' est avant le moment autorisé (création + 23h59)
     const canResendAt = user.emailTokenExpiresAt?.minus({ hours: 23, minutes: 59 })
     if (canResendAt && now < canResendAt) {
       session.flash('error', 'Veuillez patienter 1 minute avant de demander un nouveau lien.')

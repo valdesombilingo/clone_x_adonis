@@ -1,0 +1,274 @@
+@let(user = $props.user || auth.user)
+@let(title = 'Accueil X (Clone)')
+@let(description = 'Retrouvez les dernières actualités de votre réseau sur X (Clone).')
+@let(body_class = 'bg-background-dark text-white font-sans antialiased')
+
+@include('partials/header')
+{{-- =========================== LEFT SIDE =========================== --}}
+
+<div class="flex min-h-screen max-w-7xl mx-auto">
+  {{-- 1. Barre latérale gauche (Navigation Desktop) --}}
+  <aside
+    class="hidden sm:flex flex-col w-20 lg:w-64 sticky top-0 h-screen p-4 border-r border-neutral-dark"
+  >
+    <div class="flex flex-col h-full justify-between">
+      <div class="flex flex-col gap-3 items-center lg:items-start">
+        {{-- Logo --}}
+        <a
+          href="{{ route('home') }}"
+          class="text-2xl hover:bg-neutral-dark/40 py-2 px-3 rounded-full transition"
+        >
+          <i class="fa-brands fa-x-twitter text-background-light"></i>
+        </a>
+
+        <nav up-hungry class="flex flex-col gap-1 w-full">
+
+          {{-- Accueil --}}
+          @component('components/nav_links', {
+          href: route('home'),
+          route_name: 'home',
+          icon: 'home',
+          label: 'Accueil'
+          })
+          @endcomponent
+          
+          {{-- Explorer --}}
+          @component('components/nav_links', {
+          href: route('search'),
+          route_name: 'search',
+          icon: 'search',
+          label: 'Explorer'
+          })
+          @endcomponent
+          
+          {{-- Notifications --}}
+          @component('components/nav_links', {
+          href: route('notifications'),
+          route_name: 'notifications',
+          icon: 'bell',
+          label: 'Notifications'
+          })
+          @endcomponent
+          
+          {{-- Messages --}}
+          @component('components/nav_links', {
+          
+          route_name: 'messages',
+          icon: 'mail',
+          label: 'Messages'
+          })
+          @endcomponent
+          
+          {{-- Profil --}}
+          @component('components/nav_links', {
+          href: route('show_profile'),
+          route_name: 'show_profile',
+          icon: 'user',
+          label: 'Profil'
+          })
+          @endcomponent
+        </nav>
+
+        {{-- Bouton Poster --}}
+        <button class=" primary-btn font-bold py-3 mt-4  hidden lg:block shadow-sm">
+          Poster
+        </button>
+      </div>
+
+      {{-- Profil & Déconnexion --}}
+      <div class="mb-4">
+        <form action="{{ route('logout') }}" method="POST">
+          {{ csrfField() }}
+          <button
+            type="submit"
+            class="flex items-center gap-3 p-3 rounded-full hover:bg-neutral-dark w-full transition text-left"
+          >
+            <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+              <img src="{{ user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
+            </div>
+            <div class="hidden lg:block overflow-hidden">
+              <p class="font-bold text-sm truncate">
+                {{ auth.user.fullName }}
+              </p>
+              <p class="text-neutral-gray text-xs truncate">
+                {{ auth.user.userName }}
+              </p>
+            </div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </aside>
+
+  {{-- 2. Flux Central --}}
+  <main class="flex-1 border-r border-neutral-dark min-h-screen pb-20 sm:pb-0">
+    {{{ await $slots.main() }}}
+  </main>
+
+  {{-- =========================== RIGHT SIDE =========================== --}}
+
+  {{-- 3. Barre latérale droite (Tendances - Desktop uniquement) --}}
+  <aside class="hidden lg:flex flex-col w-80 p-4 sticky top-0 h-screen gap-4">
+    {{-- Tendances --}}
+    <div class="bg-neutral-dark/20 rounded-2xl p-4 border border-neutral-dark">
+      <h3 class="text-xl font-bold mb-4">
+        Tendances pour vous
+      </h3>
+      <div class="flex flex-col gap-6">
+        <div>
+          <p class="text-xs text-neutral-gray">
+            Politique · Tendances
+          </p>
+          <p class="font-bold">
+            #AdonisJS
+          </p>
+          <p class="text-xs text-neutral-gray">
+            1,240 posts
+          </p>
+        </div>
+        <div>
+          <p class="text-xs text-neutral-gray">
+            Technologie · Tendances
+          </p>
+          <p class="font-bold">
+            #TailwindCSS
+          </p>
+          <p class="text-xs text-neutral-gray">
+            856 posts
+          </p>
+        </div>
+      </div>
+      <a
+        href="{{ route('search') }}"
+        class="text-sm text-brand-primary hover:underline mt-4 inline-block"
+      >Voir plus</a>
+    </div>
+
+    {{-- Suggestions de comptes --}}
+    <div class="bg-neutral-dark/20 rounded-2xl p-4 border border-neutral-dark">
+      <h3 class="text-xl font-bold mb-4">
+        Suggestions
+      </h3>
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <img
+            src="/public/images/backgrounds/default-profile-avatar.png"
+            alt="Delly SESANGA"
+            class="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <p class="font-bold text-sm">
+              Delly SESANGA
+            </p>
+            <p class="text-xs text-neutral-gray">
+              @DSESANGA
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <img
+            src="/public/images/backgrounds/default-profile-avatar.png"
+            alt="Big7 Newark"
+            class="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <p class="font-bold text-sm">
+              Big7 Newark
+            </p>
+            <p class="text-xs text-neutral-gray">
+              @iamBig7
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <img
+            src="/public/images/backgrounds/default-profile-avatar.png"
+            alt="Taylor Swift"
+            class="w-10 h-10 rounded-full object-cover"
+          />
+          <div>
+            <p class="font-bold text-sm">
+              Taylor Swift
+            </p>
+            <p class="text-xs text-neutral-gray">
+              @taylorswift13
+            </p>
+          </div>
+        </div>
+      </div>
+      <a
+        href="{{ route('search') }}"
+        class="text-sm text-brand-primary hover:underline mt-4 inline-block"
+      >Voir plus</a>
+    </div>
+
+    {{-- Mentions légales --}}
+    <div class="text-xs text-neutral-gray px-4 flex flex-wrap gap-x-3 gap-y-1">
+      <a href="#" class="hover:underline">Conditions d'utilisation</a>
+      <a href="#" class="hover:underline">Politique de Confidentialité</a>
+      <span>© 2026 X Clone</span>
+    </div>
+  </aside>
+
+  {{-- COMPOSANTS MOBILES --}}
+  <div class="sm:hidden fixed bottom-20 right-4 z-40">
+    <button
+      class="bg-brand-primary text-white w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-2xl active:scale-95"
+    >
+      <i class="fa-solid fa-feather"></i>
+    </button>
+  </div>
+
+  <nav
+    up-hungry
+    class="sm:hidden fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-md border-t border-neutral-dark flex justify-around items-center py-3 z-50"
+  >
+    {{-- Accueil --}}
+    @component('components/nav_links', {
+          href: route('home'),
+          route_name: 'home',
+          icon: 'home',
+          label: 'Accueil'
+    })
+    @endcomponent
+          
+    {{-- Explorer --}}
+    @component('components/nav_links', {
+          href: route('search'),
+          route_name: 'search',
+          icon: 'search',
+          label: 'Explorer'
+    })
+    @endcomponent
+          
+    {{-- Notifications --}}
+    @component('components/nav_links', {
+          href: route('notifications'),
+          route_name: 'notifications',
+          icon: 'bell',
+          label: 'Notifications'
+    })
+    @endcomponent
+          
+    {{-- Messages --}}
+    @component('components/nav_links', {
+          
+          route_name: 'messages',
+          icon: 'mail',
+          label: 'Messages'
+    })
+    @endcomponent
+          
+    {{-- Profil --}}
+    @component('components/nav_links', {
+          href: route('show_profile'),
+          route_name: 'show_profile',
+          icon: 'user',
+          label: 'Profil'
+    })
+    @endcomponent
+  </nav>
+
+</div>
+
+@include('partials/footer')

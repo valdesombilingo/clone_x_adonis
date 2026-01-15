@@ -1,0 +1,34 @@
+{{-- NOTE: Ce composant permet d'afficher les icones de navigation et de simuler le fonctionnement Single page --}}
+
+@let(isActive = request.matchesRoute(route_name))
+
+<div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit">
+  <a
+    href="{{ href || '#' }}"
+    up-follow
+    up-target="#main-content"
+    class="nav-link {{ isActive ? 'text-white font-semibold' : 'text-neutral-light' }}"
+  >
+
+    @if(icon === 'home')
+      {{-- LOGIQUE SPÉCIFIQUE POUR LA PAGE HOME --}}
+      @if(isActive)
+        <hero-icon-solid name="home" class="w-8 h-8  sm:w-7 sm:h-7">
+        </hero-icon-solid>
+      @else
+        <hero-icon-outline name="home" class="w-8 h-8  sm:w-7 sm:h-7">
+        </hero-icon-outline>
+      @end
+      
+    @elseif(icon)
+      {{-- LOGIQUE GÉNÉRALE --}}
+      <hero-icon-outline
+        name="{{ icon }}"
+        class="w-8 h-8  sm:w-7 sm:h-7 {{ isActive ? 'fill-current stroke-2' : 'fill-none stroke-2' }}"
+      >
+      </hero-icon-outline>
+    @end
+    
+    <span class="hidden lg:inline text-xl">{{ label }}</span>
+  </a>
+</div>
