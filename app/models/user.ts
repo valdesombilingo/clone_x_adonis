@@ -5,6 +5,7 @@ import { BaseModel, column, hasMany } from '@adonisjs/lucid/orm'
 import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import PasswordReset from '#models/password_reset'
+import Tweet from '#models/tweet'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -71,10 +72,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare isPrivate: boolean
 
   // --- Compteurs Dénormalisés ---
-  @column()
+  @column({ consume: (val) => val ?? 0 })
   declare followersCount: number
 
-  @column()
+  @column({ consume: (val) => val ?? 0 })
   declare followingCount: number
 
   // --- Champs de l'Horodatage ---
@@ -87,4 +88,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   // Définition de la relation à l'intérieur de la classe
   @hasMany(() => PasswordReset)
   declare passwordResets: HasMany<typeof PasswordReset>
+
+  @hasMany(() => Tweet)
+  declare tweets: HasMany<typeof Tweet>
 }
