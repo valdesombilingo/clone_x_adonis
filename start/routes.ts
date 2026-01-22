@@ -15,6 +15,7 @@ const VerifyEmailsController = () => import('#controllers/verify_emails_controll
 const PasswordResetsController = () => import('#controllers/password_resets_controller')
 const HomeController = () => import('#controllers/home_controller')
 const TweetsController = () => import('#controllers/tweets_controller')
+const LikesController = () => import('#controllers/likes_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -89,6 +90,9 @@ router
 
       // 2. Route pour supprimer un tweet
       router.delete('/tweets/:id', [TweetsController, 'destroyTweet']).as('destroy_tweet')
+
+      // 3.  Route pour liker/unliker un tweet
+      router.post('/tweets/:id/like', [LikesController, 'toggleLike']).as('tweet_like')
     })
   })
   .use([middleware.auth(), middleware.emailVerified()])

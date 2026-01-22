@@ -44,6 +44,11 @@ export default class Tweet extends BaseModel {
   @column({ consume: (val) => val ?? 0 })
   declare likesCount: number
 
+  /**
+   * Propriété pour la view (non stockée en BDD)
+   */
+  declare isLiked: boolean
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

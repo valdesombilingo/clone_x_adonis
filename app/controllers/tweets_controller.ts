@@ -3,7 +3,7 @@ import { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import Tweet from '#models/tweet'
-import { createTweetValidator, updateTweetValidator } from '#validators/tweet'
+import { createTweetValidator } from '#validators/tweet'
 import fs from 'node:fs/promises'
 
 export default class TweetsController {
@@ -61,7 +61,6 @@ export default class TweetsController {
     await tweet.delete()
 
     // 3. Retour avec message flash (typique du Web Starter)
-    session.flash('success', 'Tweet supprimé avec succès.')
     return response.redirect().back()
   }
 }

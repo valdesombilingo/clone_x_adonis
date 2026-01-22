@@ -5,7 +5,7 @@
 
         <!-- ================= ONGLETS DE NAVIGATION HOME  ================= -->
 
-        <div class="flex xs:h-16 lg:h-14 border-b border-neutral-dark/40">
+        <div class="flex h-16 border-b border-neutral-dark/40">
 
           <!-- Onglet Pour vous -->
           @component('components/tabs', {
@@ -122,7 +122,7 @@
         @each(tweet in tweets)
 
           {{-- tweet --}}
-          <article class="p-4 hover:bg-neutral-dark/10 transition">
+          <article id="tweet-{{ tweet.id }}" class="p-4 hover:bg-neutral-dark/10 transition">
             <div class="flex gap-3">
 
               {{-- Avatar utilisateur --}}
@@ -206,50 +206,88 @@
                 @end
                 
                 {{-- Boutons d'action --}}
-                <div class="flex justify-between mt-4 text-neutral-gray max-w-md">
-                  <span class="hover:text-brand-primary transition">                    <i class="fa-regular fa-comment mr-2"></i>{{ tweet.repliesCount }}</span>
-                  <span class="hover:text-green-500 transition">                    <i class="fa-solid fa-retweet mr-2"></i>{{ tweet.retweetsCount }}</span>
-                  <span class="hover:text-red-500 transition">                    <i class="fa-regular fa-heart mr-2"></i>{{ tweet.likesCount }}</span>
+                <div class="flex justify-between mt-4 text-neutral-gray max-w-md items-center">
+
+                  {{-- Commentaire --}}
+                  <div class="flex items-center hover:text-brand-primary transition cursor-pointer w-16">
+                    <i class="fa-regular fa-comment mr-2"></i>
+                    <span>{{ tweet.repliesCount }}</span>
+                  </div>
+
+                  {{-- Retweet --}}
+                  <div class="flex items-center hover:text-green-500 transition cursor-pointer w-16">
+                    <i class="fa-solid fa-retweet mr-2"></i>
+                    <span>{{ tweet.retweetsCount }}</span>
+                  </div>
+
+                  {{-- Like Form --}}
+                  <div class="w-16">
+                    {{-- Conteneur fixe pour que le formulaire ne pousse pas les autres --}}
+                    <form
+                      action="{{ route('tweet_like', { id: tweet.id }) }}"
+                      method="POST"
+                      up-submit
+                      up-target="#tweet-{{ tweet.id }}"
+                      class="inline-block"
+                    >
+                      {{ csrfField() }}
+                      <button
+                        type="submit"
+                        class="flex items-center transition group outline-none {{ tweet.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }}"
+                        {{-- Ajout de w-full pour que le bouton occupe tout son espace fixe --}}
+                      >
+                        {{-- L'icône --}}
+                        <div
+                          class="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-red-500/10 transition-colors"
+                        >
+                          <i
+                            class="{{ tweet.isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart transition-transform active:scale-125 origin-center"
+                          ></i>
+                        </div>
+                        {{-- Le compteur --}}
+                        <span class="ml-1">{{ tweet.likesCount }}</span>
+                      </button>
+                    </form>
+                  </div>
+
                 </div>
-
               </div>
-            </div>
-          </article>
-        @else
-        
-          <!-- =========================== FEED SANS CONTENU =========================== -->
+            </article>
+          @else
+          
+            <!-- =========================== FEED SANS CONTENU =========================== -->
 
-          <div class="flex flex-col items-center justify-center p-12 text-center">
+            <div class="flex flex-col items-center justify-center p-12 text-center">
 
-            {{-- Abonnements  --}}
-            @if(tab === 'following')
-              <h2 class="text-white text-xl font-bold mb-2">
-                Bienvenue dans votre flux d'abonnements !
-              </h2>
-              <p class="text-neutral-gray max-w-xs">
-                Suivez des personnes pour voir leurs tweets ici.
+              {{-- Abonnements  --}}
+              @if(tab === 'following')
+                <h2 class="text-white text-xl font-bold mb-2">
+                  Bienvenue dans votre flux d'abonnements !
+                </h2>
+                <p class="text-neutral-gray max-w-xs">
+                  Suivez des personnes pour voir leurs tweets ici.
               <a
-                  href="{{ route('home', {}, { qs: { tab: 'for-you' } }) }}"
-                  up-follow
-                  up-target="#home-flux"
-                  class="text-brand-primary hover:underline"
-                >Pour vous</a>
-              </p>
+                    href="{{ route('home', {}, { qs: { tab: 'for-you' } }) }}"
+                    up-follow
+                    up-target="#home-flux"
+                    class="text-brand-primary hover:underline"
+                  >Pour vous</a>
+                </p>
 
-              {{-- Pour vous --}}
-            @else
-              <h2 class="text-white text-xl font-bold mb-2">
-                C'est bien vide ici...
-              </h2>
-              <p class="text-neutral-gray max-w-xs">
-                Soyez le premier à partager quelque chose !
-              </p>
-            @end
-          </div>
-        @end
-        
+                {{-- Pour vous --}}
+              @else
+                <h2 class="text-white text-xl font-bold mb-2">
+                  C'est bien vide ici...
+                </h2>
+                <p class="text-neutral-gray max-w-xs">
+                  Soyez le premier à partager quelque chose !
+                </p>
+              @end
+            </div>
+          @end
+          
+        </div>
       </div>
-    </div>
 
-  @endslot
-@end
+    @endslot
+  @end
