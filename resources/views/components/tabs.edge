@@ -1,0 +1,23 @@
+@let(isActive = activeTab === tabKey)
+
+<a
+  href="{{ route('home', {}, { qs: { tab: tabKey } }) }}"
+  up-follow
+  up-target="{{ target }}"
+  class="flex-1 flex flex-col items-center justify-center
+         lg:hover:bg-neutral-dark/30 transition relative group"
+>
+  <span
+    class="{{ isActive
+      ? 'font-bold text-background-light'
+      : 'font-medium text-neutral-gray' }}
+      text-sm lg:group-hover:text-background-light transition"
+  >
+    {{ label }}
+  </span>
+
+  @if(isActive)
+    <div class="absolute bottom-0 {{ indicatorWidth }} h-1 bg-brand-primary rounded-full">
+    </div>
+  @end
+</a>

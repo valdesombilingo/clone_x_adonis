@@ -6,6 +6,7 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import PasswordReset from '#models/password_reset'
 import Tweet from '#models/tweet'
+import Follow from './follow.js'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -91,4 +92,16 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasMany(() => Tweet)
   declare tweets: HasMany<typeof Tweet>
+
+  // les comptes que l’utilisateur suit
+  @hasMany(() => Follow, {
+    foreignKey: 'followerId',
+  })
+  declare following: HasMany<typeof Follow>
+
+  // les comptes qui suivent l’utilisateur
+  @hasMany(() => Follow, {
+    foreignKey: 'followingId',
+  })
+  declare followers: HasMany<typeof Follow>
 }

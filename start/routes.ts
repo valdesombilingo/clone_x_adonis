@@ -14,6 +14,7 @@ const AuthController = () => import('#controllers/auth_controller')
 const VerifyEmailsController = () => import('#controllers/verify_emails_controller')
 const PasswordResetsController = () => import('#controllers/password_resets_controller')
 const HomeController = () => import('#controllers/home_controller')
+const TweetsController = () => import('#controllers/tweets_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -65,17 +66,29 @@ router
 
 // Routes protégées (connexion et email validé obligatoire)
 router
-  // 1. Route home, accueil
   .group(() => {
-    router.get('/home', [HomeController, 'index']).as('home')
+    // Route de navigation
+    router.group(() => {
+      // 1. Route home, accueil
+      router.get('/home', [HomeController, 'index']).as('home')
 
-    // 2. Route pour les recherches d'utilisateurs et hashtags
-    router.get('/search', [HomeController, 'search']).as('search')
+      // 2. Route pour les recherches d'utilisateurs et hashtags
+      router.get('/search', [HomeController, 'search']).as('search')
 
-    // 3. Route pour les notifications
-    router.get('/notifications', [HomeController, 'notifications']).as('notifications')
+      // 3. Route pour les notifications
+      router.get('/notifications', [HomeController, 'notifications']).as('notifications')
 
-    // 4. Route pour l'affichage du profil utilisateur
-    router.get('/profile', [HomeController, 'profile']).as('show_profile')
+      // 4. Route pour l'affichage du profil utilisateur
+      router.get('/profile', [HomeController, 'profile']).as('show_profile')
+    })
+
+    // Routes Tweets
+    router.group(() => {
+      // 1. Route pour poster un tweet
+      router.post('/tweets', [TweetsController, 'storeTweet']).as('store_tweet')
+
+      // 2. Route pour supprimer un tweet
+      router.delete('/tweets/:id', [TweetsController, 'destroyTweet']).as('destroy_tweet')
+    })
   })
   .use([middleware.auth(), middleware.emailVerified()])

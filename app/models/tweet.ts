@@ -6,9 +6,12 @@ import {
   hasMany,
   afterCreate,
   afterDelete,
+  computed,
 } from '@adonisjs/lucid/orm'
+
 import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
+import Like from './like.js'
 
 export default class Tweet extends BaseModel {
   @column({ isPrimary: true })
@@ -43,6 +46,26 @@ export default class Tweet extends BaseModel {
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+
+  @computed()
+  get formattedDate() {
+    const now = DateTime.now()
+    const diff = now.diff(this.createdAt, ['days', 'hours', 'minutes']).toObject()
+
+    if (diff.days! > 7) {
+      return this.createdAt.toFormat('d MMM', { locale: 'fr' })
+    }
+    if (diff.days! >= 1) {
+      return `${Math.floor(diff.days!)} j`
+    }
+    if (diff.hours! >= 1) {
+      return `${Math.floor(diff.hours!)} h`
+    }
+    if (diff.minutes! >= 1) {
+      return `${Math.floor(diff.minutes!)} min`
+    }
+    return 'maintenant'
+  }
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
@@ -79,6 +102,8 @@ export default class Tweet extends BaseModel {
   })
   declare retweets: HasMany<typeof Tweet>
 
+  @hasMany(() => Like)
+  declare likes: HasMany<typeof Like>
   // ==========================================================
   // HOOKS Lucid pour gérer automatiquement les compteurs
   // ==========================================================

@@ -1,102 +1,255 @@
 @layout.main()
   @slot('main')
-    <div class="sticky top-0 bg-black/80 backdrop-blur-sm border-b border-neutral-dark z-20">
-      <div class="px-4 py-3 hidden">
-        <h2 class="text-xl font-bold">
-          Accueil
-        </h2>
-      </div>
+    <div id="home-flux">
+      <div class="sticky top-0 bg-black/80 backdrop-blur-sm border-b border-neutral-dark z-20">
 
-      {{-- Système d'onglets --}}
-      <div class="flex h-14 border-b border-neutral-dark/40">
-        <button
-          class="flex-1 flex flex-col items-center justify-center hover:bg-neutral-dark/30 transition relative group"
-        >
-          <span class="font-bold text-sm">Pour vous</span>
-          <div class="absolute bottom-0 w-16 h-1 bg-brand-primary rounded-full">
-          </div>
-        </button>
+        <!-- ================= ONGLETS DE NAVIGATION HOME  ================= -->
 
-        <button
-          class="flex-1 flex flex-col items-center justify-center hover:bg-neutral-dark/30 transition text-neutral-gray group"
-        >
-          <span class="font-medium text-sm group-hover:text-white transition">Abonnements</span>
-          <div class="absolute bottom-0 w-24 h-1 bg-brand-primary rounded-full hidden">
-          </div>
-        </button>
-      </div>
-    </div>
+        <div class="flex xs:h-16 lg:h-14 border-b border-neutral-dark/40">
 
-    {{-- Zone de création de post (Desktop/Tablette) --}}
-    <div class="hidden sm:flex p-4 border-b border-neutral-dark gap-4">
-      <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-        <img
-          src="{{ auth.user.avatar }}"
-          alt="Avatar de {{ auth.user.fullName }}"
-          class="w-full h-full object-cover"
-        />
-      </div>
-      <div class="flex-1">
-        <textarea
-          placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
-          class="w-full bg-transparent text-lg border-none focus:ring-0 resize-none placeholder:text-neutral-gray"
-          rows="2"
-        ></textarea>
-        <div class="flex justify-between items-center pt-3">
-          <div class="flex gap-4 text-brand-primary text-lg">
-            <i class="fa-regular fa-image cursor-pointer hover:bg-brand-primary/10 p-2 rounded-full transition"></i>
-            <i class="fa-solid fa-list-ul cursor-pointer hover:bg-brand-primary/10 p-2 rounded-full transition"></i>
-            <i
-              class="fa-regular fa-face-smile cursor-pointer hover:bg-brand-primary/10 p-2 rounded-full transition"
-            ></i>
-          </div>
-          <button
-            class="bg-brand-primary hover:bg-brand-hoverPrimary px-6 py-1.5 rounded-full font-bold text-white transition"
-          >
-            Poster
-          </button>
+          <!-- Onglet Pour vous -->
+          @component('components/tabs', {
+          label: 'Pour vous',
+          tabKey: 'for-you',
+          target: '#home-flux',
+          activeTab: tab,
+          indicatorWidth: 'w-16'
+          })
+          @end
+          
+          
+          <!-- Onglet Abonnements -->
+          @component('components/tabs', {
+          label: 'Abonnements',
+          tabKey: 'following',
+          target: '#home-flux',
+          activeTab: tab,
+          indicatorWidth: 'w-24'
+          })
+          @end
+          
         </div>
       </div>
-    </div>
 
-    {{-- Flux de Posts --}}
-    <div class="divide-y divide-neutral-dark">
-      <article class="p-4 hover:bg-neutral-dark/10 transition cursor-pointer">
-        <div class="flex gap-3">
-          <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-            <img
-              src="{{ auth.user.avatar }}"
-              alt="Avatar de {{ auth.user.fullName }}"
-              class="w-full h-full object-cover"
-            />
+      <!-- ================= CREATION DE POSTE (Desktop/Tablette)) ================= -->
+
+      <form
+        action="{{ route('store_tweet') }}"
+        method="POST"
+        enctype="multipart/form-data"
+        class="hidden sm:flex p-4 border-b border-neutral-dark gap-4"
+      >
+        {{ csrfField() }}
+        {{-- Avatar utilisateur --}}
+        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+          <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="flex-1">
+
+          {{-- Contenu du tweet --}}
+          <textarea
+            name="content"
+            placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
+            class="tweet-textarea"
+            rows="2"
+          >{{ old('content') || '' }}</textarea>
+
+          {{-- Aperçu média (image/vidéo) --}}
+          <div id="preview-container" class="hidden relative mt-3 mb-2 max-w-full">
+            <img id="image-preview" class="rounded-2xl border border-neutral-dark object-cover w-full" />
+            <video id="video-preview" class="rounded-2xl border border-neutral-dark hidden w-full" controls>
+            </video>
+
+            {{-- Bouton de fermeture d'aperçu média --}}
+            <button type="button" id="remove-media" class="close-media">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="font-bold hover:underline">AdonisJS Team</span>
-              <span class="text-neutral-gray text-sm">                @adonisjs
-                · 2h</span>
-            </div>
-            <p class="mt-1 text-neutral-light leading-normal">
-              Bienvenue sur ton nouveau flux, <span class="text-brand-primary">{{ auth.user.fullName }}</span>! 
-              Ton interface supporte maintenant les onglets et les avatars dynamiques. 🚀
+
+          {{-- Message en cas d'erreur --}}
+          @inputError('content')
+            <p class="error-message">
+              {{ $messages.join(', ') }}
             </p>
-            <div class="flex justify-between mt-4 text-neutral-gray max-w-md text-sm">
-              <div class="flex items-center gap-2 hover:text-brand-primary transition group">
-                <i class="fa-regular fa-comment p-2"></i>12
-              </div>
-              <div class="flex items-center gap-2 hover:text-green-500 transition group">
-                <i class="fa-solid fa-retweet p-2"></i>5
-              </div>
-              <div class="flex items-center gap-2 hover:text-red-500 transition group">
-                <i class="fa-regular fa-heart p-2"></i>42
-              </div>
-              <div class="flex items-center gap-2 hover:text-brand-primary transition group">
-                <i class="fa-solid fa-chart-simple p-2"></i>1k
+          @end
+          
+          <div class="flex justify-between items-center mt-2">
+
+            {{-- Icones de contenu --}}
+            <div class="flex gap-4 text-lg items-center">
+
+              {{-- Icone média --}}
+              <label>
+                <i class="fa-regular fa-image post-icon"></i>
+                <input type="file" name="mediaUrl" class="hidden" accept="image/*,video/*" />
+              </label>
+
+              {{-- Icone emoji --}}
+              <div class="relative">
+                <i id="emoji-button" class="fa-regular fa-face-smile post-icon"></i>
+                <div id="emoji-picker-container" class="absolute z-50 top-full left-0 mt-2 hidden">
+                  <emoji-picker locale="fr" class="dark">
+                  </emoji-picker>
+                </div>
               </div>
             </div>
+
+            {{-- Bouton de soumission du tweet --}}
+            <button
+              type="submit"
+              class="bg-brand-primary hover:bg-brand-hoverPrimary px-6 py-1.5 rounded-full font-bold text-white transition"
+            >
+              Poster
+          </button>
           </div>
+
+          {{-- Message en cas d'erreur --}}
+          @inputError('mediaUrl')
+            <p class="error-message">
+              {{ $messages.join(', ') }}
+            </p>
+          @end
+          
         </div>
-      </article>
+      </form>
+
+      <!-- ============================== FEED FLUX ============================== -->
+
+      <div class="divide-y divide-neutral-dark">
+
+        {{-- Boucle d'affichage de tweet --}}
+        @each(tweet in tweets)
+
+          {{-- tweet --}}
+          <article class="p-4 hover:bg-neutral-dark/10 transition">
+            <div class="flex gap-3">
+
+              {{-- Avatar utilisateur --}}
+              <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+                <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
+              </div>
+
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3">
+                  {{-- Fullname utilisateur --}}
+                  @component('components/links', {
+                  type: 'nav-link',
+                  href: route('show_profile'),
+                  target: '#main-content',
+                  class_name: 'font-bold text-white lg:hover:underline truncate',
+                  label: tweet.user.fullName
+                  })
+                  @endcomponent
+                  
+                  {{-- Username utilisateur --}}
+                  @component('components/links', {
+                  type: 'nav-link',
+                  href: route('show_profile'),
+                  target: '#main-content',
+                  class_name: 'text-neutral-gray truncate opacity-80',
+                  label: '@' + tweet.user.userName
+                  })
+                  @endcomponent
+                  
+                  {{-- Date de création du tweet --}}
+                  <span class="text-neutral-gray whitespace-nowrap">· {{ tweet.formattedDate }}</span>
+
+                  {{-- Suppression du tweet s'il seulement il nous appartient  --}}
+                  @if(tweet.userId === auth.user.id)
+                    <form
+                      action="{{ route('destroy_tweet', { id: tweet.id }) }}?_method=DELETE"
+                      method="POST"
+                      onsubmit="return confirm('Supprimer ce tweet ?')"
+                      class="ml-auto"
+                    >
+                      {{ csrfField() }}
+                      {{-- Bouton de suppression --}}
+                      <button type="submit">
+                        <i class="fa-regular fa-trash-canfa-regular fa-trash-can delete-icon"></i>
+                      </button>
+                    </form>
+                  @end
+                </div>
+
+                {{-- Contenut texte du tweet avec linkify --}}
+                @if(tweet.content)
+                  <p class="mt-1 text-neutral-light">
+                    {{{ linkify(tweet.content) }}}
+                  </p>
+                @end
+                
+                {{-- Contenut texte du tweet --}}
+                @if(tweet.mediaUrl)
+                  <div class="mt-3 max-w-fit">
+                    <div
+                      class="relative overflow-hidden rounded-2xl border border-neutral-dark bg-black flex items-center justify-center"
+                    >
+
+                      @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+                        {{-- Vidéo --}}
+                        <video src="{{ tweet.mediaUrl }}" controls class="max-h-[400px] min-w-[400px] block bg-black">
+                        </video>
+
+                      @else
+                        {{-- Image --}}
+                        <img
+                          src="{{ tweet.mediaUrl }}"
+                          alt="Post media"
+                          class="max-h-[350px] w-auto max-w-full object-cover"
+                          loading="lazy"
+                        />
+                      @end
+                      
+                    </div>
+                  </div>
+                @end
+                
+                {{-- Boutons d'action --}}
+                <div class="flex justify-between mt-4 text-neutral-gray max-w-md">
+                  <span class="hover:text-brand-primary transition">                    <i class="fa-regular fa-comment mr-2"></i>{{ tweet.repliesCount }}</span>
+                  <span class="hover:text-green-500 transition">                    <i class="fa-solid fa-retweet mr-2"></i>{{ tweet.retweetsCount }}</span>
+                  <span class="hover:text-red-500 transition">                    <i class="fa-regular fa-heart mr-2"></i>{{ tweet.likesCount }}</span>
+                </div>
+
+              </div>
+            </div>
+          </article>
+        @else
+        
+          <!-- =========================== FEED SANS CONTENU =========================== -->
+
+          <div class="flex flex-col items-center justify-center p-12 text-center">
+
+            {{-- Abonnements  --}}
+            @if(tab === 'following')
+              <h2 class="text-white text-xl font-bold mb-2">
+                Bienvenue dans votre flux d'abonnements !
+              </h2>
+              <p class="text-neutral-gray max-w-xs">
+                Suivez des personnes pour voir leurs tweets ici.
+              <a
+                  href="{{ route('home', {}, { qs: { tab: 'for-you' } }) }}"
+                  up-follow
+                  up-target="#home-flux"
+                  class="text-brand-primary hover:underline"
+                >Pour vous</a>
+              </p>
+
+              {{-- Pour vous --}}
+            @else
+              <h2 class="text-white text-xl font-bold mb-2">
+                C'est bien vide ici...
+              </h2>
+              <p class="text-neutral-gray max-w-xs">
+                Soyez le premier à partager quelque chose !
+              </p>
+            @end
+          </div>
+        @end
+        
+      </div>
     </div>
-  @end
+
+  @endslot
 @end

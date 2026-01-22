@@ -84,6 +84,29 @@
   @apply flex items-center gap-4 py-2 px-3  transition-all duration-100 ease-in-out;
 }
 
-.card-scroll {
-  scrollbar-gutter: stable;
+.tweet-textarea {
+  @apply w-full bg-transparent text-lg border-none focus:ring-0 resize-none placeholder:text-neutral-gray;
 }
+
+.close-media {
+  @apply absolute top-2 right-2 bg-background-dark/70 text-background-light rounded-full w-8 h-8 flex items-center justify-center transition;
+  @apply lg:hover:bg-background-dark/90;
+}
+
+.post-icon {
+  @apply cursor-pointer text-brand-primary  p-2 rounded-full transition;
+  @apply lg:hover:bg-brand-primary/10;
+}
+
+.delete-icon {
+  @apply text-neutral-gray text-xl rounded-full transition px-[0.6rem] py-2;
+  @apply lg:hover:text-state-error lg:hover:bg-state-error/10;
+}
+
+.error-message {
+  @apply text-state-error text-sm mt-1;
+}
+
+/* .card-scroll {
+  scrollbar-gutter: stable;
+} */

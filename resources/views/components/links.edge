@@ -1,6 +1,10 @@
-{{-- Lien secondaire (secondary link) --}}
-
-<a href="{{ link || '#' }}" aria-label="{{ label }}" class="secondary-link">
-  {{ label }}
+@if(type === 'secondary-link')
+  <a href="{{ link || '#' }}" aria-label="{{ label }}" class="secondary-link">
+    {{ label }}
 </a>
+
+@elseif(type === 'nav-link')
+  <a href="{{ href || '#' }}" up-follow up-target="{{ target }}" class="{{ class_name }}">{{ label }}</a>
+
+@end
 
