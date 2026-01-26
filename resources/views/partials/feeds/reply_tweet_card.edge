@@ -5,14 +5,13 @@
 >
   {{-- Avatar --}}
   <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-    <img src="{{ reply.user.avatar }}" class="w-full h-full object-cover" />
+    <img src="{{ reply.user.avatar }}" class="w-full h-full object-cover" loading="lazy" />
   </div>
 
   {{-- Contenu de la réponse --}}
   <div class="flex-1 min-w-0">
     {{-- LIGNE DU HAUT : Noms + Date + Bouton à droite --}}
     <div class="flex items-center gap-1.5">
-      {{-- Fullname --}}
       @component('components/links', {
                 type: 'nav-link',
                 href: route('show_profile', { username: reply.user.userName }),
@@ -22,7 +21,6 @@
       })
       @endcomponent
                 
-      {{-- Username --}}
       @component('components/links', {
                 type: 'nav-link',
                 href: route('show_profile', { username: reply.user.userName }),
@@ -32,7 +30,6 @@
       })
       @endcomponent
                 
-      {{-- Date --}}
       @component('components/links', {
                 type: 'nav-link',
                 href: route('show_tweet', { username: reply.user.userName, id: reply.id }),
@@ -42,7 +39,6 @@
       })
       @endcomponent
                 
-      {{-- BOUTON SUPPRESSION (Déplacé ici avec ml-auto) --}}
       @if(reply.userId === auth.user.id)
         <form
           action="{{ route('destroy_tweet', { id: reply.id }) }}?_method=DELETE"
@@ -51,13 +47,12 @@
           onsubmit="return confirm('Supprimer cette réponse ?')"
           class="ml-auto"
           up-submit
-          up-target="#tweet-detail"
-          {{-- Pousse le bouton au bout de la ligne --}}
+          up-target="#main-content"
         >
           {{ csrfField() }}
-        <button
+          <button
             type="submit"
-            class="p-2 text-neutral-gray hover:text-red-500 hover:bg-red-500/10 rounded-full transition"
+            class="py-1 px-2.5 text-neutral-gray hover:text-red-500 hover:bg-red-500/10 rounded-full transition"
           >
             <i class="fa-regular fa-trash-can text-[0.938rem]"></i>
           </button>
@@ -67,38 +62,54 @@
 
     {{-- LIGNE DU BAS : "En réponse à" --}}
     <div class="flex flex-col">
-      <span class="text-neutral-gray text-sm mb-3 mt-[-5px]">
+      <span class="text-neutral-gray text-sm mb-2 mt-[-2px]">
         En réponse à 
-      <a
+        <a
           href="#"
           onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;"
           class="text-brand-primary hover:underline"
         >
           {{ tweet.user.userName }}
-      </a>
+        </a>
       </span>
 
-      <p class="text-white text-[0.938rem]">
+      <p class="text-white text-[0.938rem] break-words">
         {{{ linkify(reply.content) }}}
       </p>
 
       {{-- Média de la réponse --}}
       @if(reply.mediaUrl)
-        <div class="mt-3 rounded-2xl border border-neutral-800 overflow-hidden">
-          <img src="{{ reply.mediaUrl }}" class="max-h-80 w-auto object-contain" />
+        <div class="mt-3 rounded-2xl border border-neutral-800 overflow-hidden bg-black max-w-fit">
+          @if(reply.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+            <video
+              src="{{ reply.mediaUrl }}"
+              controls
+              up-keep
+              preload="metadata"
+              id="video-{{ reply.id }}"
+              class="max-h-[400px] min-w-[400px] block bg-black"
+            >
+            </video>
+          @else
+            <img
+              src="{{ reply.mediaUrl }}"
+              alt="Post media"
+              class="max-h-[350px] w-auto max-w-full object-cover"
+              loading="lazy"
+            />
+          @endif
         </div>
       @endif
                 
       {{-- Icônes d'interactions --}}
       <div class="flex justify-around mt-3 text-neutral-gray">
-
-        {{-- 1. Commentaires --}}
+        {{-- Commentaires --}}
         <a
-          href="{{ route('show_reply_tweet', { username: tweet.user.userName, id: tweet.id }) }}"
+          href="{{ route('show_reply_tweet', { username: reply.user.userName, id: reply.id }) }}"
           up-follow
           up-target="#main-content"
           onclick="event.stopPropagation()"
-          class="flex items-center group cursor-pointer lg:hover:text-brand-primary scale-icon"
+          class="flex items-center group cursor-pointer lg:hover:text-brand-primary"
         >
           <div
             class="w-9 h-9 flex items-center justify-center group-hover:bg-brand-primary/10 rounded-full transition"
@@ -108,15 +119,15 @@
           <span class="text-[0.938rem] ml-1">{{ reply.repliesCount }}</span>
         </a>
 
-        {{-- 2. Retweets --}}
-        <div class="flex items-center group text-neutral-dark">
+        {{-- Retweets (statique pour l'instant) --}}
+        <div class="flex items-center group text-neutral-gray opacity-50">
           <div class="w-9 h-9 flex items-center justify-center">
             <i class="fa-solid fa-retweet text-[0.938rem]"></i>
           </div>
           <span class="text-[0.938rem] ml-1">{{ reply.retweetsCount }}</span>
         </div>
 
-        {{-- 3. Like --}}
+        {{-- Like --}}
         <div id="like-container-{{ reply.id }}">
           <form
             action="{{ route('tweet_like', { id: reply.id }) }}"
@@ -125,12 +136,12 @@
             up-target="#like-container-{{ reply.id }}"
           >
             {{ csrfField() }}
-      <button
+            <button
               type="submit"
               class="flex items-center group {{ reply.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }} transition-colors"
             >
               <div
-                class="w-9 h-9 flex items-center justify-center group-hover:bg-red-500/10 rounded-full scale-icon"
+                class="w-9 h-9 flex items-center justify-center group-hover:bg-red-500/10 rounded-full transition scale-icon"
               >
                 <i class="{{ reply.isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart text-[0.938rem]"></i>
               </div>
@@ -138,8 +149,7 @@
             </button>
           </form>
         </div>
-
       </div>
-
     </div>
-  </article>
+  </div>
+</article>

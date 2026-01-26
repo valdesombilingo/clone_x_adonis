@@ -76,9 +76,15 @@
 
     {{-- Affichage des erreurs de validation du média --}}
     @inputError('mediaUrl')
-      <p class="error-message">
+      {{-- 1. Si Adonis renvoie une erreur (format, serveur, etc.) --}}
+      <p class="text-red-500 text-sm mt-1">
         {{ $messages.join(', ') }}
       </p>
+    @else
+      {{-- 2. Sinon, on laisse la place pour l'erreur JavaScript (taille) --}}
+      <p id="js-media-error" class="text-red-500 text-sm mt-1 hidden">
+      </p>
     @end
+    
   </div>
 </form>
