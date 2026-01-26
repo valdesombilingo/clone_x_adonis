@@ -22,22 +22,19 @@ body {
 .emoji-picker-panel {
   border-radius: 12px;
   overflow: hidden;
-  border: 1px solid #333; /* Bordure discrète pour le mode sombre */
-
-  /* Ombre simple, épaisse et égale partout (0 offset) */
+  border: 1px solid #333;
   box-shadow: 0 0 8px 1px rgba(80, 80, 80, 0.7);
 }
 
 /* Personnalisation du composant emoji-picker */
 emoji-picker {
-  /* Taille réduite */
   width: 290px;
   height: 350px;
   --num-columns: 7;
   --emoji-size: 1.1rem;
 
   /* Couleurs pour le thème sombre */
-  --background: #000000; /* Couleur typique Twitter/X */
+  --background: #000000;
   --border-color: #000000;
   --outline-color: #1d9bf0; /* Bleu brand pour le focus */
   --indicator-color: #1d9bf0;

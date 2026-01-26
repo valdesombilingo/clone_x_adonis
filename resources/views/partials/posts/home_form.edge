@@ -1,0 +1,84 @@
+<form
+  action="{{ route('store_tweet') }}"
+  method="POST"
+  enctype="multipart/form-data"
+  class="hidden sm:flex p-4 border-b border-neutral-dark gap-4"
+>
+  {{ csrfField() }}
+  {{-- Avatar de l'utilisateur --}}
+  <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+    <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
+  </div>
+
+  <div class="flex-1">
+
+    {{-- Zone de texte pour le contenu du tweet --}}
+    <textarea
+      name="content"
+      placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
+      class="tweet-textarea"
+      rows="2"
+    >{{ old('content') || '' }}</textarea>
+
+    {{-- Aperçu du média (image/vidéo) avant publication --}}
+    <div
+      id="preview-container"
+      class="hidden relative mt-3 mb-2 w-fit max-w-full mx-auto overflow-hidden rounded-2xl border border-neutral-dark"
+    >
+
+      <img id="image-preview" class="hidden" />
+      <video id="video-preview" class="hidden" controls>
+      </video>
+
+      {{-- Bouton pour supprimer le média de l'aperçu --}}
+      <button type="button" id="remove-media" class="close-media">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    {{-- Affichage des erreurs de validation du contenu --}}
+    @inputError('content')
+      <p class="error-message">
+        {{ $messages.join(', ') }}
+      </p>
+    @end
+            
+    {{-- Barre d'outils pour les icônes et bouton d'envoi --}}
+    <div class="flex justify-between items-center mt-2">
+
+      {{-- Icônes d'actions (média et emoji) --}}
+      <div class="flex gap-4 text-lg items-center">
+
+        {{-- Icône pour ajouter un média (image/vidéo) --}}
+        <label>
+          <i class="fa-regular fa-image post-icon"></i>
+          <input type="file" name="mediaUrl" class="hidden" accept="image/*,video/*" />
+        </label>
+
+        {{-- Icône pour ajouter un emoji --}}
+        <div class="relative">
+          <i id="emoji-button" class="fa-regular fa-face-smile post-icon"></i>
+          <div id="emoji-picker-container" class="absolute z-50 top-full left-0 mt-2 hidden">
+            <emoji-picker locale="fr" class="dark">
+            </emoji-picker>
+          </div>
+        </div>
+      </div>
+
+      {{-- Bouton pour soumettre le tweet --}}
+      <button
+        type="submit"
+        class="bg-brand-primary hover:bg-brand-hoverPrimary px-6 py-1.5 rounded-full font-bold text-white transition"
+      >
+        Poster
+            </button>
+    </div>
+
+    {{-- Affichage des erreurs de validation du média --}}
+    @inputError('mediaUrl')
+      <p class="error-message">
+        {{ $messages.join(', ') }}
+      </p>
+    @end
+  </div>
+</form>

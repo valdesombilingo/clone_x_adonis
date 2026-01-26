@@ -26,12 +26,15 @@ export const updateTweetValidator = vine.compile(
 )
 
 // Définition des messages d'erreur personnalisés
-
 const messages = {
   // Messages génériques
   'string': 'Le champ {{ field }} doit être une chaîne de caractères.',
   'file': 'Le format du {{ field }} est invalide.',
   'positive': 'Le champ {{ field }} doit être un nombre positif.',
+
+  'file.extname':
+    'Le format du fichier {{ field }} est invalide. Extensions autorisées : {{ extnames }}.',
+  'file.size': 'Le fichier {{ field }} est trop lourd. Limite : {{ size }}.',
 
   // Messages spécifiques
   'content.required': 'Vous devez rédiger un {{ field }} si vous ne publiez pas de média.',

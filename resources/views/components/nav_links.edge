@@ -1,6 +1,6 @@
 {{-- NOTE: Ce composant permet d'afficher les icones de navigation et de simuler le fonctionnement Single page --}}
 
-@let(isActive = request.matchesRoute(route_name))
+@let(isActive = request.matchesRoute(route_name) || (route_name === 'home' && request.matchesRoute('show_tweet')))
 
 <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit">
   <a

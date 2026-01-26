@@ -1,0 +1,72 @@
+<form
+  action="{{ route('store_tweet') }}"
+  method="POST"
+  enctype="multipart/form-data"
+  class="flex gap-3"
+  up-submit
+  up-target="#main-content"
+>
+  {{ csrfField() }}
+          <input type="hidden" name="parentId" value="{{ tweet.id }}" />
+
+  <!-- Colonne Ligne (haut) + Avatar -->
+  <div class="flex flex-col items-center flex-shrink-0">
+    <div class="w-0.5 h-1 bg-neutral-800">
+    </div>
+    <div class="w-12 h-12 rounded-full overflow-hidden">
+      <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
+    </div>
+  </div>
+
+  <div class="flex-1 pt-1">
+    <textarea name="content" placeholder="Poster votre réponse" class="tweet-textarea" autofocus>{{ old('content') || '' }}</textarea>
+
+    {{-- Aperçu média --}}
+    <div
+      id="preview-container"
+      class="hidden relative mt-3 mb-4 w-fit max-w-full rounded-2xl border border-neutral-800 overflow-hidden"
+    >
+      <img id="image-preview" class="hidden max-h-80 w-auto object-contain bg-black" />
+      <video id="video-preview" class="hidden max-h-80 w-auto bg-black" controls>
+      </video>
+      <button
+        type="button"
+        id="remove-media"
+        class="absolute top-2 right-2 w-8 h-8 flex items-center justify-center bg-black/70 hover:bg-neutral-800 rounded-full text-white transition"
+      >
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    @inputError('content')
+      <p class="text-red-500 text-[13px] mb-2">
+        {{ $messages.join(', ') }}
+      </p>
+    @end
+            
+    <div class="flex justify-between items-center py-3 border-t border-neutral-800">
+      <div class="flex -ml-2">
+        <label class="group cursor-pointer p-2 rounded-full hover:bg-brand-primary/10 transition">
+          <i class="fa-regular fa-image text-brand-primary text-[18px]"></i>
+          <input type="file" name="mediaUrl" id="media-input" class="hidden" accept="image/*,video/*" />
+        </label>
+        <button type="button" class="p-2 rounded-full hover:bg-brand-primary/10 transition">
+          <i class="fa-regular fa-face-smile text-brand-primary text-[18px]"></i>
+        </button>
+      </div>
+
+      <button
+        type="submit"
+        class="bg-brand-primary hover:bg-brand-hoverPrimary px-6 py-2 rounded-full font-bold text-white transition"
+      >
+        Répondre
+              </button>
+    </div>
+
+    @inputError('mediaUrl')
+      <p class="text-red-500 text-[13px] mt-2">
+        {{ $messages.join(', ') }}
+      </p>
+    @end
+  </div>
+</form>

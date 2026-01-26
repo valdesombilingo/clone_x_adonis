@@ -1,0 +1,96 @@
+@layout.main()
+  @slot('main')
+    <div class="flex flex-col min-h-screen bg-black">
+
+      {{-- ========================================================== --}}
+      {{-- ================= EN-TETE STICKY (REPLY) ================= --}}
+      {{-- ========================================================== --}}
+
+      <div
+        class="sticky top-0 bg-black/80 backdrop-blur-sm z-30 flex items-center px-3 sm:px-6 h-16 sm:h-14"
+      >
+        @component('components/links', {
+                    type: 'nav-link',
+                    href: (tweet.parentId && tweet.parent?.user?.userName) ? route('show_tweet', { username: tweet.parent.user.userName, id: tweet.parentId }) : route('home'),
+                    target: '#main-content',
+                    class_name: 'py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center scale-icon',
+                    icon: 'fa-solid fa-arrow-left text-lg'
+        })
+        @endcomponent
+        
+        <h1 class="text-xl font-bold text-white">
+          Réponse
+        </h1>
+      </div>
+
+      <div class="px-4 py-2 flex flex-col">
+
+        {{-- ================================================== --}}
+        {{-- ================= TWEET ORIGINAL ================= --}}
+        {{-- ================================================== --}}
+
+        <div class="flex gap-3">
+
+          <!-- Colonne Avatar + Ligne -->
+          <div class="flex flex-col items-center flex-shrink-0">
+            <div class="w-12 h-12 rounded-full overflow-hidden">
+              <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
+            </div>
+
+            <!-- LIGNE DE LIAISON -->
+            <div class="w-0.5 grow mt-1 bg-neutral-800">
+            </div>
+          </div>
+
+          <div class="flex-1 pb-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-1.5 whitespace-nowrap text-[0.938rem]">
+                {{-- Nom complet de l'auteur --}}
+                @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_profile'),
+                    target: '#main-content',
+                    class_name: 'font-bold text-white lg:hover:underline truncate',
+                    label: tweet.user.fullName
+                })
+                @endcomponent
+                    
+                {{-- Pseudo de l'auteur --}}
+                @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_profile'),
+                    target: '#main-content',
+                    class_name: 'text-neutral-gray truncate opacity-80',
+                    label: '@' + tweet.user.userName
+                })
+                @endcomponent
+                    
+                {{-- Date de création formatée du tweet --}}
+                @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_tweet', { username: tweet.user.userName, id: tweet.id }),
+                    target: '#main-content',
+                    class_name: 'text-neutral-gray whitespace-nowrap',
+                    label:'· ' + tweet.formattedDate
+                })
+                @endcomponent
+              </div>
+            </div>
+
+            <div class="text-[0.938rem] leading-normal text-white mt-0.5">
+              {{{ linkify(tweet.content) }}}
+            </div>
+
+            <div class="mt-3 text-sm">
+              <span class="text-neutral-500">En réponse à</span>
+              <span class="text-brand-primary hover:underline cursor-pointer">{{ tweet.user.userName }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULAIRE DE RÉPONSE -->
+        @include('partials/posts/reply_form')
+      </div>
+    </div>
+  @endslot
+@end

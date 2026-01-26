@@ -1,13 +1,17 @@
 @layout.main()
   @slot('main')
-    <div id="home-flux">
-      <div class="sticky top-0 bg-black/80 backdrop-blur-sm border-b border-neutral-dark z-20">
+    {{-- Page principale du flux home --}}
+    <div id="home-flux" class="min-h-screen">
+      {{-- En-tête sticky avec onglets de navigation --}}
+      <div class="sticky top-0 bg-black/80 backdrop-blur-sm border-b border-neutral-dark z-30">
 
-        <!-- ================= ONGLETS DE NAVIGATION HOME  ================= -->
+        {{-- ============================================================== --}}
+        {{-- ================= ONGLETS DE NAVIGATION HOME ================= --}}
+        {{-- ============================================================== --}}
 
-        <div class="flex h-16 border-b border-neutral-dark/40">
+        <div class="flex h-16 sm:h-14">
 
-          <!-- Onglet Pour vous -->
+          {{-- Onglet "Pour vous" --}}
           @component('components/tabs', {
           label: 'Pour vous',
           tabKey: 'for-you',
@@ -15,10 +19,9 @@
           activeTab: tab,
           indicatorWidth: 'w-16'
           })
-          @end
+          @endcomponent
           
-          
-          <!-- Onglet Abonnements -->
+          {{-- Onglet "Abonnements" --}}
           @component('components/tabs', {
           label: 'Abonnements',
           tabKey: 'following',
@@ -26,268 +29,66 @@
           activeTab: tab,
           indicatorWidth: 'w-24'
           })
-          @end
+          @endcomponent
           
         </div>
+
       </div>
 
-      <!-- ================= CREATION DE POSTE (Desktop/Tablette)) ================= -->
+      {{-- ======================================================================== --}}
+      {{-- ================= CRÉATION DE TWEET (Desktop/Tablette) ================= --}}
+      {{-- ======================================================================== --}}
 
-      <form
-        action="{{ route('store_tweet') }}"
-        method="POST"
-        enctype="multipart/form-data"
-        class="hidden sm:flex p-4 border-b border-neutral-dark gap-4"
-      >
-        {{ csrfField() }}
-        {{-- Avatar utilisateur --}}
-        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-          <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
-        </div>
+      @include('partials/posts/home_form')
 
-        <div class="flex-1">
-
-          {{-- Contenu du tweet --}}
-          <textarea
-            name="content"
-            placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
-            class="tweet-textarea"
-            rows="2"
-          >{{ old('content') || '' }}</textarea>
-
-          {{-- Aperçu média (image/vidéo) --}}
-          <div id="preview-container" class="hidden relative mt-3 mb-2 max-w-full">
-            <img id="image-preview" class="rounded-2xl border border-neutral-dark object-cover w-full" />
-            <video id="video-preview" class="rounded-2xl border border-neutral-dark hidden w-full" controls>
-            </video>
-
-            {{-- Bouton de fermeture d'aperçu média --}}
-            <button type="button" id="remove-media" class="close-media">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-
-          {{-- Message en cas d'erreur --}}
-          @inputError('content')
-            <p class="error-message">
-              {{ $messages.join(', ') }}
-            </p>
-          @end
-          
-          <div class="flex justify-between items-center mt-2">
-
-            {{-- Icones de contenu --}}
-            <div class="flex gap-4 text-lg items-center">
-
-              {{-- Icone média --}}
-              <label>
-                <i class="fa-regular fa-image post-icon"></i>
-                <input type="file" name="mediaUrl" class="hidden" accept="image/*,video/*" />
-              </label>
-
-              {{-- Icone emoji --}}
-              <div class="relative">
-                <i id="emoji-button" class="fa-regular fa-face-smile post-icon"></i>
-                <div id="emoji-picker-container" class="absolute z-50 top-full left-0 mt-2 hidden">
-                  <emoji-picker locale="fr" class="dark">
-                  </emoji-picker>
-                </div>
-              </div>
-            </div>
-
-            {{-- Bouton de soumission du tweet --}}
-            <button
-              type="submit"
-              class="bg-brand-primary hover:bg-brand-hoverPrimary px-6 py-1.5 rounded-full font-bold text-white transition"
-            >
-              Poster
-          </button>
-          </div>
-
-          {{-- Message en cas d'erreur --}}
-          @inputError('mediaUrl')
-            <p class="error-message">
-              {{ $messages.join(', ') }}
-            </p>
-          @end
-          
-        </div>
-      </form>
-
-      <!-- ============================== FEED FLUX ============================== -->
+      {{-- ========================================================= --}}
+      {{-- ================= FLUX PRINCIPAL (FEED) ================= --}}
+      {{-- ========================================================= --}}
 
       <div class="divide-y divide-neutral-dark">
-
-        {{-- Boucle d'affichage de tweet --}}
+        {{-- Boucle d'affichage de chaque tweet --}}
         @each(tweet in tweets)
 
-          {{-- tweet --}}
-          <article id="tweet-{{ tweet.id }}" class="p-4 hover:bg-neutral-dark/10 transition">
-            <div class="flex gap-3">
+          {{-- Article d'un tweet individuel --}}
+          @include('partials/feeds/home_tweet_card')
 
-              {{-- Avatar utilisateur --}}
-              <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
-                <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
-              </div>
+          {{-- État vide : aucun tweet à afficher --}}
+        @else
+        
+          {{-- ===================================================== --}}
+          {{-- ================= MESSAGE FLUX VIDE ================= --}}
+          {{-- ===================================================== --}}
 
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-3">
-                  {{-- Fullname utilisateur --}}
-                  @component('components/links', {
-                  type: 'nav-link',
-                  href: route('show_profile'),
-                  target: '#main-content',
-                  class_name: 'font-bold text-white lg:hover:underline truncate',
-                  label: tweet.user.fullName
-                  })
-                  @endcomponent
-                  
-                  {{-- Username utilisateur --}}
-                  @component('components/links', {
-                  type: 'nav-link',
-                  href: route('show_profile'),
-                  target: '#main-content',
-                  class_name: 'text-neutral-gray truncate opacity-80',
-                  label: '@' + tweet.user.userName
-                  })
-                  @endcomponent
-                  
-                  {{-- Date de création du tweet --}}
-                  <span class="text-neutral-gray whitespace-nowrap">· {{ tweet.formattedDate }}</span>
+          <div class="flex flex-col items-center justify-center p-12 text-center">
 
-                  {{-- Suppression du tweet s'il seulement il nous appartient  --}}
-                  @if(tweet.userId === auth.user.id)
-                    <form
-                      action="{{ route('destroy_tweet', { id: tweet.id }) }}?_method=DELETE"
-                      method="POST"
-                      onsubmit="return confirm('Supprimer ce tweet ?')"
-                      class="ml-auto"
-                    >
-                      {{ csrfField() }}
-                      {{-- Bouton de suppression --}}
-                      <button type="submit">
-                        <i class="fa-regular fa-trash-canfa-regular fa-trash-can delete-icon"></i>
-                      </button>
-                    </form>
-                  @end
-                </div>
+            {{-- Message pour l'onglet "Abonnements" vide --}}
+            @if(tab === 'following')
+              <h2 class="text-white text-xl font-bold mb-2">
+                Bienvenue dans votre flux d'abonnements !
+              </h2>
+              <p class="text-neutral-gray max-w-xs">
+                Suivez des personnes pour voir leurs tweets ici.
+                <a
+                  href="{{ route('home', {}, { qs: { tab: 'for-you' } }) }}"
+                  up-follow
+                  up-target="#home-flux"
+                  class="text-brand-primary hover:underline"
+                >Pour vous</a>
+              </p>
 
-                {{-- Contenut texte du tweet avec linkify --}}
-                @if(tweet.content)
-                  <p class="mt-1 text-neutral-light">
-                    {{{ linkify(tweet.content) }}}
-                  </p>
-                @end
-                
-                {{-- Contenut texte du tweet --}}
-                @if(tweet.mediaUrl)
-                  <div class="mt-3 max-w-fit">
-                    <div
-                      class="relative overflow-hidden rounded-2xl border border-neutral-dark bg-black flex items-center justify-center"
-                    >
-
-                      @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
-                        {{-- Vidéo --}}
-                        <video src="{{ tweet.mediaUrl }}" controls class="max-h-[400px] min-w-[400px] block bg-black">
-                        </video>
-
-                      @else
-                        {{-- Image --}}
-                        <img
-                          src="{{ tweet.mediaUrl }}"
-                          alt="Post media"
-                          class="max-h-[350px] w-auto max-w-full object-cover"
-                          loading="lazy"
-                        />
-                      @end
-                      
-                    </div>
-                  </div>
-                @end
-                
-                {{-- Boutons d'action --}}
-                <div class="flex justify-between mt-4 text-neutral-gray max-w-md items-center">
-
-                  {{-- Commentaire --}}
-                  <div class="flex items-center hover:text-brand-primary transition cursor-pointer w-16">
-                    <i class="fa-regular fa-comment mr-2"></i>
-                    <span>{{ tweet.repliesCount }}</span>
-                  </div>
-
-                  {{-- Retweet --}}
-                  <div class="flex items-center hover:text-green-500 transition cursor-pointer w-16">
-                    <i class="fa-solid fa-retweet mr-2"></i>
-                    <span>{{ tweet.retweetsCount }}</span>
-                  </div>
-
-                  {{-- Like Form --}}
-                  <div class="w-16">
-                    {{-- Conteneur fixe pour que le formulaire ne pousse pas les autres --}}
-                    <form
-                      action="{{ route('tweet_like', { id: tweet.id }) }}"
-                      method="POST"
-                      up-submit
-                      up-target="#tweet-{{ tweet.id }}"
-                      class="inline-block"
-                    >
-                      {{ csrfField() }}
-                      <button
-                        type="submit"
-                        class="flex items-center transition group outline-none {{ tweet.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }}"
-                        {{-- Ajout de w-full pour que le bouton occupe tout son espace fixe --}}
-                      >
-                        {{-- L'icône --}}
-                        <div
-                          class="w-8 h-8 flex items-center justify-center rounded-full group-hover:bg-red-500/10 transition-colors"
-                        >
-                          <i
-                            class="{{ tweet.isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart transition-transform active:scale-125 origin-center"
-                          ></i>
-                        </div>
-                        {{-- Le compteur --}}
-                        <span class="ml-1">{{ tweet.likesCount }}</span>
-                      </button>
-                    </form>
-                  </div>
-
-                </div>
-              </div>
-            </article>
-          @else
-          
-            <!-- =========================== FEED SANS CONTENU =========================== -->
-
-            <div class="flex flex-col items-center justify-center p-12 text-center">
-
-              {{-- Abonnements  --}}
-              @if(tab === 'following')
-                <h2 class="text-white text-xl font-bold mb-2">
-                  Bienvenue dans votre flux d'abonnements !
-                </h2>
-                <p class="text-neutral-gray max-w-xs">
-                  Suivez des personnes pour voir leurs tweets ici.
-              <a
-                    href="{{ route('home', {}, { qs: { tab: 'for-you' } }) }}"
-                    up-follow
-                    up-target="#home-flux"
-                    class="text-brand-primary hover:underline"
-                  >Pour vous</a>
-                </p>
-
-                {{-- Pour vous --}}
-              @else
-                <h2 class="text-white text-xl font-bold mb-2">
-                  C'est bien vide ici...
-                </h2>
-                <p class="text-neutral-gray max-w-xs">
-                  Soyez le premier à partager quelque chose !
-                </p>
-              @end
-            </div>
-          @end
-          
-        </div>
+              {{-- Message pour l'onglet "Pour vous" vide --}}
+            @else
+              <h2 class="text-white text-xl font-bold mb-2">
+                C'est bien vide ici...
+              </h2>
+              <p class="text-neutral-gray max-w-xs">
+                Soyez le premier à partager quelque chose !
+              </p>
+            @end
+          </div>
+        @end
+            
       </div>
-
-    @endslot
-  @end
+    </div>
+  @endslot
+@end

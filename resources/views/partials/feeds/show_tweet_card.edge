@@ -1,0 +1,143 @@
+<article>
+  <div class="px-4 sm:px-8 py-3 sm:py-4">
+
+    {{-- Auteur du Tweet --}}
+    <div class="flex items-center gap-3 mb-4">
+
+      {{-- Avatar de l'auteur du tweet --}}
+      <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+        <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
+      </div>
+      <div class="flex-1 flex items-start justify-between">
+
+        <div class="flex flex-col">
+
+          {{-- Nom complet de l'auteur --}}
+          <div>
+            @component('components/links', {
+                  type: 'nav-link',
+                  href: route('show_profile'),
+                  target: '#main-content',
+                  class_name: 'font-bold text-white lg:hover:underline truncate',
+                  label: tweet.user.fullName
+            })
+            @endcomponent
+          </div>
+
+          {{-- Pseudo de l'auteur --}}
+          <div>
+            @component('components/links', {
+                  type: 'nav-link',
+                  href: route('show_profile'),
+                  target: '#main-content',
+                  class_name: 'text-neutral-gray truncate opacity-80',
+                  label: '@' + tweet.user.userName
+            })
+            @endcomponent
+          </div>
+        </div>
+
+        {{-- Bouton de suppression --}}
+        @if(tweet.userId === auth.user.id)
+          @include('partials/icons/delete_form')
+        @endif
+              
+      </div>
+
+    </div>
+
+    {{-- Contenu Texte --}}
+    <div class="text-white leading-normal mb-4 break-words">
+      {{{ linkify(tweet.content) }}}
+    </div>
+
+    {{-- Média Adaptatif : Taille réduite sur Desktop/Tablette --}}
+    @if(tweet.mediaUrl)
+      <div
+        class="relative w-fit max-w-full mx-auto overflow-hidden rounded-2xl border border-neutral-800 bg-black mb-4"
+      >
+        @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+          <video src="{{ tweet.mediaUrl }}" up-keep controls class="max-h-[700px] w-auto block">
+          </video>
+        @else
+          <img src="{{ tweet.mediaUrl }}" class="max-h-[700px] w-auto block object-contain" />
+        @endif
+      </div>
+    @endif
+          
+    <div>
+      {{-- Date de création détaillée du tweet --}}
+      @component('components/links', {
+                  type: 'nav-link',
+                  href: route('show_tweet', { username: tweet.user.userName, id: tweet.id }),
+                  target: '#main-content',
+                  class_name: 'text-neutral-gray pt-2',
+                  label:tweet.createdAt.toFormat('HH:mm · dd LLL yyyy')
+      })
+      @endcomponent
+                  
+    </div>
+
+  </div>
+
+  {{-- Barre d'interactions du Post Principal --}}
+  <div class="flex justify-around border-y border-neutral-800 text-neutral-gray">
+
+    {{-- Commentaires --}}
+    <div class="w-20 flex justify-center">
+      {{-- Icône de commentaire --}}
+      <a
+        href="{{ route('show_reply_tweet', { username: tweet.user.userName, id: tweet.id }) }}"
+        class="flex items-center lg:hover:text-brand-primary cursor-pointer w-16"
+        up-follow
+        up-target="#main-content"
+        onclick=event.stopPropagation
+      >
+        <i class="fa-regular fa-comment lg:hover:bg-brand-primary/10 p-3 rounded-full scale-icon mr-1"></i>
+        <span>{{ tweet.repliesCount }}</span>
+      </a>
+    </div>
+
+    {{-- Retweets --}}
+    <div class="w-20 flex justify-center">
+      <button class="group flex items-center py-2 text-neutral-dark">
+        <span class="w-10 h-10 flex items-center justify-center">
+          <i class="fa-solid fa-retweet"></i>
+        </span>
+        <span class="min-w-[1.5rem] text-center tabular-nums">
+          {{ tweet.retweetsCount }}
+              </span>
+      </button>
+    </div>
+
+    {{-- Like --}}
+    <div class="w-20 flex justify-center">
+      <form
+        action="{{ route('tweet_like', { id: tweet.id }) }}"
+        method="POST"
+        up-submit
+        up-target="#tweet-detail"
+      >
+        {{ csrfField() }}
+             <button
+          type="submit"
+          class="group flex items-center gap-1 py-2 transition
+               {{ tweet.isLiked ? 'text-red-500' : 'hover:text-red-500' }}"
+        >
+          <span
+            class="w-10 h-10 flex items-center justify-center rounded-full
+                 group-hover:bg-red-500/10 transition-transform
+                 active:scale-110"
+          >
+            <i class="{{ tweet.isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+          </span>
+          <span class="min-w-[1.5rem] text-center tabular-nums">
+            {{ tweet.likesCount }}
+                </span>
+        </button>
+      </form>
+    </div>
+
+  </div>
+
+</article>

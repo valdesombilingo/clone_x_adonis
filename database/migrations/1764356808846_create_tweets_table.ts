@@ -25,7 +25,7 @@ export default class extends BaseSchema {
         .unsigned()
         .references('id')
         .inTable('tweets')
-        .onDelete('SET NULL')
+        .onDelete('CASCADE')
         .nullable()
         .comment('Réponse à un autre tweet.')
       table

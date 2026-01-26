@@ -1,0 +1,53 @@
+@layout.main()
+  @slot('main')
+    <div id="tweet-detail" class="min-h-screen">
+
+      {{-- =============================================================== --}}
+      {{-- ================= EN-TETE STICKY (SHOW TWEET) ================= --}}
+      {{-- =============================================================== --}}
+      <div
+        class="sticky top-0 bg-black/80 backdrop-blur-sm z-30 flex items-center px-3 sm:px-6 h-16 sm:h-14"
+      >
+
+        @component('components/links', {
+                    type: 'nav-link',
+                    href: (tweet.parentId && tweet.parent?.user?.userName) ? route('show_tweet', { username: tweet.parent.user.userName, id: tweet.parentId }) : route('home'),
+                    target: '#main-content',
+                    class_name: 'py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center scale-icon',
+                    icon: 'fa-solid fa-arrow-left text-lg'
+        })
+        @endcomponent
+        
+        <h1 class="text-xl font-bold text-white">
+          Post
+        </h1>
+      </div>
+
+      {{-- ================================================ --}}
+      {{-- ================= TWEET PARENT ================= --}}
+      {{-- ================================================ --}}
+
+      @include('partials/feeds/show_tweet_card')
+
+      {{-- ================================================= --}}
+      {{-- ================= FEED REPONSES ================= --}}
+      {{-- ================================================= --}}
+
+      <div class="bg-black">
+        @each(reply in tweet.replies)
+          @include('partials/feeds/reply_tweet_card')
+
+        @else
+        
+          {{-- ===================================================== --}}
+          {{-- ================= MESSAGE FLUX VIDE ================= --}}
+          {{-- ===================================================== --}}
+
+          <div class="p-8 text-center text-neutral-500">
+            Aucune réponse pour le moment.
+          </div>
+        @endeach
+      </div>
+
+    @endslot
+  @end

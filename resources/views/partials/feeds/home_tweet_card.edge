@@ -1,0 +1,146 @@
+{{-- Article d'un tweet individuel --}}
+<article
+  id="tweet-{{ tweet.id }}"
+  class="p-4 lg:hover:bg-neutral-dark/20 transition cursor-pointer"
+  onclick="if(!window.getSelection().toString() && !event.target.closest('button, a, form, input')) { up.visit('{{ route('show_tweet', { username: tweet.user.userName, id: tweet.id }) }}', { target: '#main-content' }) }"
+>
+
+  <div class="flex gap-3" onclick=event.stopPropagation>
+
+    {{-- Avatar de l'auteur du tweet --}}
+    <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+      <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
+    </div>
+
+    <div class="flex-1 min-w-0">
+      {{-- En-tête du tweet : nom, username, date et bouton de suppression --}}
+      <div class="flex items-center gap-3">
+
+        {{-- Nom complet de l'auteur --}}
+        @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_profile'),
+                    target: '#main-content',
+                    class_name: 'font-bold text-white lg:hover:underline truncate',
+                    label: tweet.user.fullName
+        })
+        @endcomponent
+                    
+        {{-- Pseudo de l'auteur --}}
+        @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_profile'),
+                    target: '#main-content',
+                    class_name: 'text-neutral-gray truncate opacity-80',
+                    label: '@' + tweet.user.userName
+        })
+        @endcomponent
+                    
+        {{-- Date de création formatée du tweet --}}
+        @component('components/links', {
+                    type: 'nav-link',
+                    href: route('show_tweet', { username: tweet.user.userName, id: tweet.id }),
+                    target: '#main-content',
+                    class_name: 'text-neutral-gray whitespace-nowrap',
+                    label:'· ' + tweet.formattedDate
+        })
+        @endcomponent
+                    
+        {{-- Bouton de suppression (visible uniquement si c'est l'auteur) --}}
+        @if(tweet.userId === auth.user.id)
+          @include('partials/icons/delete_form')
+        @end
+      </div>
+
+      {{-- Contenu textuel du tweet --}}
+      @if(tweet.content)
+        <p class="mt-1 text-neutral-light">
+          {{{ linkify(tweet.content) }}}
+        </p>
+      @end
+                  
+      {{-- Média du tweet (image ou vidéo) --}}
+      @if(tweet.mediaUrl)
+        <div class="mt-3 max-w-fit">
+          <div
+            class="relative overflow-hidden rounded-2xl border border-neutral-dark bg-black flex items-center justify-center"
+          >
+
+            {{-- Affichage vidéo si le média est une vidéo --}}
+            @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+              <video
+                src="{{ tweet.mediaUrl }}"
+                controls
+                up-keep
+                id="video-{{ tweet.id }}"
+                class="max-h-[400px] min-w-[400px] block bg-black"
+              >
+              </video>
+
+              {{-- Affichage image sinon --}}
+            @else
+              <img
+                src="{{ tweet.mediaUrl }}"
+                alt="Post media"
+                class="max-h-[350px] w-auto max-w-full object-cover"
+                loading="lazy"
+              />
+            @end
+          </div>
+        </div>
+      @end
+                  
+      {{-- Barre d'actions : réponse, retweet, like --}}
+      <div
+        class="flex justify-between mt-4 text-neutral-gray max-w-md items-center"
+        onclick=event.stopPropagation
+      >
+
+        {{-- Bouton pour répondre au tweet --}}
+        <a
+          href="{{ route('show_reply_tweet', { username: tweet.user.userName, id: tweet.id }) }}"
+          class="flex items-center lg:hover:text-brand-primary cursor-pointer w-16"
+          up-follow
+          up-target="#main-content"
+          onclick=event.stopPropagation
+        >
+          <i class="fa-regular fa-comment lg:hover:bg-brand-primary/10 p-3 rounded-full scale-icon mr-1"></i>
+          <span>{{ tweet.repliesCount }}</span>
+        </a>
+
+        {{-- Bouton retweet (affichage seul) --}}
+        <div class="flex items-center text-neutral-dark w-16">
+          <i class="fa-solid fa-retweet mr-2"></i>
+          <span>{{ tweet.retweetsCount }}</span>
+        </div>
+
+        {{-- Formulaire pour liker/disliker le tweet --}}
+        <div class="w-16">
+          <form
+            action="{{ route('tweet_like', { id: tweet.id }) }}"
+            method="POST"
+            up-submit
+            up-target="#tweet-{{ tweet.id }}"
+            class="inline-block"
+          >
+            {{ csrfField() }}
+                      <button
+              type="submit"
+              class="flex items-center transition group outline-none {{ tweet.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }}"
+            >
+              {{-- Icône du cœur (plein ou vide selon le statut like) --}}
+              <div
+                class="w-10 h-10 flex items-center justify-center rounded-full lg:group-hover:bg-red-500/10 scale-icon"
+              >
+                <i class="{{ tweet.isLiked ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+              </div>
+              {{-- Compteur des likes --}}
+              <span class="ml-1">{{ tweet.likesCount }}</span>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</article>

@@ -31,12 +31,18 @@ up.compiler('form[enctype="multipart/form-data"]', function (form) {
     const handleMetadata = () => {
       const width = isVideo ? mediaElement.videoWidth : mediaElement.naturalWidth
       const height = isVideo ? mediaElement.videoHeight : mediaElement.naturalHeight
-      let baseClass = 'w-full rounded-2xl border border-neutral-dark shadow-sm object-cover '
 
+      // 1. On s'assure que l'élément est visible en permutant les classes
+      mediaElement.classList.remove('hidden')
+      mediaElement.classList.add('block')
+
+      // 2. On applique la logique de dimensionnement 2026
       if (height > width) {
-        mediaElement.className = baseClass + ' max-h-[350px] w-auto aspect-auto object-cover'
+        // PORTRAIT : w-auto permet au parent 'w-fit' de se resserrer sur l'image
+        mediaElement.className = 'block max-h-[550px] w-auto h-auto object-contain'
       } else {
-        mediaElement.className = baseClass + ' w-[350px] aspect-video'
+        // PAYSAGE : w-full prend la largeur maximale
+        mediaElement.className = 'block w-full h-auto object-cover'
       }
     }
 

@@ -3,50 +3,53 @@ import Tweet from '#models/tweet'
 import db from '@adonisjs/lucid/services/db'
 
 export default class HomeController {
-  /**
-   * Affichage 'home' (Fil d'actualité)
-   */
+  // =========================================================================
+  // Affichage 'home' fil d'actualité 'index'
+  // =========================================================================
 
   async index({ view, request, auth }: HttpContext) {
     // 1. Récupérer l'utilisateur connecté
     const user = auth.getUserOrFail()
 
-    // 2. Récupérer l'onglet actif depuis la requête (défaut: 'for-you')
+    // 2. Récupérer l'onglet actif (défaut: 'for-you')
     const tab = request.input('tab', 'for-you')
 
-    // 3. Récupérer le curseur (dernier tweet déjà affiché)
-    const cursor = request.input('cursor')
-
-    // 4. Construire la requête de base pour les tweets
+    // 3. Construire la requête
     const tweetsQuery = Tweet.query()
+      .whereNull('parentId')
       .preload('user')
-      .select(['id', 'userId', 'content', 'mediaUrl', 'createdAt', 'likesCount'])
+      .preload('replies')
+      .select('*')
       .select(
         db.raw(
-          '(SELECT EXISTS (SELECT 1 FROM likes WHERE tweet_id = tweets.id AND user_id = ?)) as "isLiked"',
+          '(SELECT EXISTS (SELECT 1 FROM likes WHERE tweet_id = tweets.id AND user_id = ?)) as is_liked',
           [user.id]
         )
       )
       .orderBy('createdAt', 'desc')
-      .limit(50) // lot de tweets par requête
+      .limit(500)
 
-    // 5. Filtrer selon l’onglet sélectionné
+    // 4. Logique de l'onglet Following (Abonnements)
     if (tab === 'following') {
       tweetsQuery.whereIn('userId', (query) => {
         query.from('follows').select('following_id').where('follower_id', user.id)
       })
     }
 
-    // 6. Appliquer le curseur si présent (tweets plus anciens que le dernier affiché)
-    if (cursor) {
-      tweetsQuery.where('id', '<', cursor)
-    }
-
-    // 7. Exécuter la requête
+    // 5. Exécuter la requête
     const tweets = await tweetsQuery
 
-    // 8. Renvoyer la vue avec les données nécessaires
-    return view.render('pages/home', { tweets, tab, user })
+    // 6. Transférer l'état de $extras vers le modèle pour Edge
+    tweets.forEach((tweet) => {
+      tweet.isLiked = Boolean(tweet.$extras.is_liked)
+    })
+
+    // 7. Renvoyer la vue
+    return view.render('pages/home', {
+      tweets,
+      tab,
+      user,
+    })
   }
 
   /**

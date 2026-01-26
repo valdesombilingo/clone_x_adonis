@@ -85,6 +85,11 @@ router
 
     // Routes Tweets
     router.group(() => {
+      //  1. Route pour modale poster, citer, repondre à un tweet
+      router
+        .get('/:username/tweets/:id/reply', [TweetsController, 'showReplyTweetForm'])
+        .as('show_reply_tweet')
+
       // 1. Route pour poster un tweet
       router.post('/tweets', [TweetsController, 'storeTweet']).as('store_tweet')
 
@@ -93,6 +98,8 @@ router
 
       // 3.  Route pour liker/unliker un tweet
       router.post('/tweets/:id/like', [LikesController, 'toggleLike']).as('tweet_like')
+      // 4. Route pour afficher un tweet spécifique
+      router.get('/:username/tweets/:id', [TweetsController, 'showTweet']).as('show_tweet')
     })
   })
   .use([middleware.auth(), middleware.emailVerified()])
