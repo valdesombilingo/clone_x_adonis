@@ -1,19 +1,42 @@
-<div class="flex flex-col gap-1 w-full">
-  <input
-    type="{{ type || 'text' }}"
-    name="{{ name }}"
-    id="{{ name }}"
-    placeholder="{{ placeholder || '' }}"
-    class="input {{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'input-base' }}"
-    value="{{ old(name) || '' }}"
-    aria-describedby="{{ name }}-error"
-  />
+@if(group === 'auth')
+  <div class="flex flex-col gap-1 w-full">
+    <input
+      type="{{ type || 'text' }}"
+      name="{{ name }}"
+      id="{{ name }}"
+      placeholder="{{ placeholder || '' }}"
+      class="input {{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'input-base' }}"
+      value="{{ old(name) || '' }}"
+      aria-describedby="{{ name }}-error"
+    />
 
-  @inputError(name)
-    @each(message in $messages)
-      <p id="{{ name }}-error" class="text-state-error text-xs ml-1">
-        {{ message }}
-      </p>
+    @inputError(name)
+      @each(message in $messages)
+        <p id="{{ name }}-error" class="text-red-500 text-xs ml-1">
+          {{ message }}
+        </p>
+      @end
     @end
-  @end
-</div>
+  </div>
+
+@elseif(group === 'profile')
+  <div class="flex flex-col gap-1 w-full">
+    <input
+      type="{{ type || 'text' }}"
+      name="{{ name }}"
+      id="{{ name }}"
+      placeholder="{{ placeholder || '' }}"
+      class="{{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'border-neutral-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary' }} bg-black text-white p-4 rounded-md border w-full brand-secondary outline-none transition-all duration-200 ease-in-out"
+      value="{{ old(name) || value || '' }}"
+      aria-describedby="{{ name }}-error"
+    />
+
+    @inputError(name)
+      @each(message in $messages)
+        <p id="{{ name }}-error" class="text-red-500 text-xs ml-1">
+          {{ message }}
+        </p>
+      @end
+    @end
+  </div>
+@endif

@@ -8,9 +8,14 @@
   <div class="flex gap-3" onclick=event.stopPropagation>
 
     {{-- Avatar de l'auteur du tweet --}}
-    <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+    <a
+      href="{{ route('show_profile', { username: tweet.user.userName }) }}"
+      up-submit
+      up-target="#main-content"
+      class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+    >
       <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
-    </div>
+    </a>
 
     <div class="flex-1 min-w-0">
       {{-- En-tête du tweet : nom, username, date et bouton de suppression --}}
@@ -19,7 +24,7 @@
         {{-- Nom complet de l'auteur --}}
         @component('components/links', {
                     type: 'nav-link',
-                    href: route('show_profile'),
+                    href: route('show_profile', { username: tweet.user.userName }),
                     target: '#main-content',
                     class_name: 'font-bold text-white lg:hover:underline truncate',
                     label: tweet.user.fullName
@@ -29,7 +34,7 @@
         {{-- Pseudo de l'auteur --}}
         @component('components/links', {
                     type: 'nav-link',
-                    href: route('show_profile'),
+                    href: route('show_profile', { username: tweet.user.userName }),
                     target: '#main-content',
                     class_name: 'text-neutral-gray truncate opacity-80',
                     label: '@' + tweet.user.userName

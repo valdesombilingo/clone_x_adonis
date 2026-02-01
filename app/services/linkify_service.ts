@@ -12,8 +12,8 @@ export function linkifyText(text: string): string {
 
     // 2. Raccourcir affichage URLs trop longues (ex: https://site.com...)
     format: (value: string, type: string) => {
-      if (type === 'url' && value.length > 35) {
-        return value.substring(0, 35) + '…'
+      if (type === 'url' && value.length > 30) {
+        return value.substring(0, 30) + '…'
       }
       return value
     },

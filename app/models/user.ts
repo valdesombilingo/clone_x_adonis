@@ -47,6 +47,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   @column()
   declare bannerImage: string | null
 
+  get banner() {
+    return this.bannerImage || '/images/backgrounds/defaut-profile-banner.png'
+  }
+
   @column()
   declare location: string | null
 
@@ -104,4 +108,36 @@ export default class User extends compose(BaseModel, AuthFinder) {
     foreignKey: 'followingId',
   })
   declare followers: HasMany<typeof Follow>
+
+  // ==========================================================
+  // MÉTHODES STATIQUES
+  // ==========================================================
+
+  // Génération d'un slug de base à partir du nom complet
+  static createBaseUsername(fullName: string): string {
+    return fullName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]/g, '')
+  }
+
+  // Garantit un 'username' unique en ajoutant un suffixe numérique si nécessaire
+  static async generateUniqueUsername(
+    baseUsername: string,
+    currentUserId?: number
+  ): Promise<string> {
+    let username = baseUsername
+    let suffix = 0
+    while (true) {
+      const query = this.query().where('userName', username)
+      if (currentUserId) query.whereNot('id', currentUserId)
+
+      const existingUser = await query.first()
+      if (!existingUser) return username
+
+      suffix++
+      username = `${baseUsername}${suffix}`
+    }
+  }
 }

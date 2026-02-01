@@ -17,32 +17,6 @@ import mail from '@adonisjs/mail/services/main'
  */
 export default class AuthController {
   // =========================================================================
-  // Méthodes de Gestion du Username
-  // =========================================================================
-
-  // Génération d'un slug de base à partir du nom complet
-  private createBaseUsername(fullName: string): string {
-    return fullName
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]/g, '')
-  }
-
-  // Garantit un 'username' unique en ajoutant un suffixe numérique si nécessaire.
-  private async generateUniqueUsername(baseUsername: string): Promise<string> {
-    let username = baseUsername
-    let suffix = 0
-
-    while (true) {
-      const existingUser = await User.query().where('userName', username).first()
-      if (!existingUser) return username
-      suffix++
-      username = `${baseUsername}${suffix}`
-    }
-  }
-
-  // =========================================================================
   // Inscription 'storeUser'
   // =========================================================================
 
@@ -80,8 +54,8 @@ export default class AuthController {
       }
 
       // 3. Génération du Username unique
-      const baseUsername = this.createBaseUsername(fullName)
-      const uniqueUsername = await this.generateUniqueUsername(baseUsername)
+      const base = User.createBaseUsername(fullName)
+      const uniqueUsername = await User.generateUniqueUsername(base)
 
       // 4. Génération du Token de vérification
       const emailVerificationToken = crypto.randomBytes(60).toString('hex')

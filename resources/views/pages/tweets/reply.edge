@@ -1,6 +1,6 @@
 @layout.main()
   @slot('main')
-    <div class="flex flex-col min-h-screen bg-black">
+    <div class="flex flex-col min-h-screen bg-background-dark">
 
       {{-- ========================================================== --}}
       {{-- ================= EN-TETE STICKY (REPLY) ================= --}}
@@ -13,7 +13,7 @@
                     type: 'nav-link',
                     href: (tweet.parentId && tweet.parent?.user?.userName) ? route('show_tweet', { username: tweet.parent.user.userName, id: tweet.parentId }) : route('home'),
                     target: '#main-content',
-                    class_name: 'py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center scale-icon',
+                    class_name: 'py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center',
                     icon: 'fa-solid fa-arrow-left text-lg'
         })
         @endcomponent
@@ -33,9 +33,15 @@
 
           <!-- Colonne Avatar + Ligne -->
           <div class="flex flex-col items-center flex-shrink-0">
-            <div class="w-12 h-12 rounded-full overflow-hidden">
-              <img src="{{ tweet.user.avatar }}" class="w-full h-full object-cover" />
-            </div>
+            <a
+              href="{{ route('show_profile', { username: tweet.user.userName }) }}"
+              up-follow
+              up-target="#main-content"
+              class="w-12 h-12 rounded-full overflow-hidden block"
+              {{-- Correction ici : plus de ' avant le # --}}
+            >
+              <img src="{{ tweet.user.avatar }}" alt="Avatar Profile" class="w-full h-full object-cover" />
+            </a>
 
             <!-- LIGNE DE LIAISON -->
             <div class="w-0.5 grow mt-1 bg-neutral-800">
@@ -48,7 +54,7 @@
                 {{-- Nom complet de l'auteur --}}
                 @component('components/links', {
                     type: 'nav-link',
-                    href: route('show_profile'),
+                    href: route('show_profile', { username: tweet.user.userName }),
                     target: '#main-content',
                     class_name: 'font-bold text-white lg:hover:underline truncate',
                     label: tweet.user.fullName
@@ -58,7 +64,7 @@
                 {{-- Pseudo de l'auteur --}}
                 @component('components/links', {
                     type: 'nav-link',
-                    href: route('show_profile'),
+                    href: route('show_profile', { username: tweet.user.userName }),
                     target: '#main-content',
                     class_name: 'text-neutral-gray truncate opacity-80',
                     label: '@' + tweet.user.userName

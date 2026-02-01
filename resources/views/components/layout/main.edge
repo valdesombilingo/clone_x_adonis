@@ -61,7 +61,7 @@
           
           {{-- Profil --}}
           @component('components/nav_links', {
-          href: route('show_profile'),
+          href: route('show_profile', { username: auth.user.userName }),
           route_name: 'show_profile',
           icon: 'user',
           label: 'Profil'
@@ -261,7 +261,7 @@
           
     {{-- Profil --}}
     @component('components/nav_links', {
-          href: route('show_profile'),
+          href: route('show_profile', { username: auth.user.userName }),
           route_name: 'show_profile',
           icon: 'user',
           label: 'Profil'

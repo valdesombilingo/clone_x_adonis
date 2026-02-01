@@ -3,7 +3,7 @@
     {{-- Page principale du flux home --}}
     <div id="home-flux" class="min-h-screen">
       {{-- En-tête sticky avec onglets de navigation --}}
-      <div class="sticky top-0 bg-black/80 backdrop-blur-sm border-b border-neutral-dark z-30">
+      <div class="sticky top-0 bg-background-dark/80 backdrop-blur-sm border-b border-neutral-dark z-30">
 
         {{-- ============================================================== --}}
         {{-- ================= ONGLETS DE NAVIGATION HOME ================= --}}
@@ -17,7 +17,8 @@
           tabKey: 'for-you',
           target: '#home-flux',
           activeTab: tab,
-          indicatorWidth: 'w-16'
+          indicatorWidth: 'w-16',
+          url: route('home', {}, { qs: { tab: 'for-you' } })
           })
           @endcomponent
           
@@ -27,9 +28,11 @@
           tabKey: 'following',
           target: '#home-flux',
           activeTab: tab,
-          indicatorWidth: 'w-24'
+          indicatorWidth: 'w-24',
+          url: route('home', {}, { qs: { tab: 'following' } })
           })
           @endcomponent
+          
           
         </div>
 

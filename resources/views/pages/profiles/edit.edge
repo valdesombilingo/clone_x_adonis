@@ -1,0 +1,244 @@
+@layout.main()
+  @slot('main')
+    <div id="profile-edit" class="min-h-screen bg-black">
+
+      {{-- Formulaire --}}
+      <form
+        action="{{ route('update_profile') }}?_method=PUT"
+        method="POST"
+        enctype="multipart/form-data"
+        up-submit
+        up-target="#main-content"
+        class="profile-edit-container"
+        novalidate
+      >
+        {{ csrfField() }}
+        {{-- Les inputs de suppression  --}}
+        <input type="hidden" name="deleteBanner" id="deleteBannerInput" value="false" />
+        <input type="hidden" name="deleteAvatar" id="deleteAvatarInput" value="false" />
+
+        <div
+          class="sticky top-0 bg-black/80 backdrop-blur-sm z-30 px-4 py-3 flex items-center justify-between"
+        >
+          <div class="flex items-center">
+            <a
+              href="{{ route('show_profile', { username: user.userName }) }}"
+              up-follow
+              up-target="#main-content"
+              class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center"
+            >
+              <i class="fa-solid fa-arrow-left text-lg"></i>
+            </a>
+            <h1 class="font-bold text-lg sm:text-xl text-white">
+              Modifier le profil
+            </h1>
+          </div>
+
+          <button type="submit" class="btn-social-auth w-28 sm:w-36 font-semiBold">Enregistrer</button>
+        </div>
+
+        {{-- Modal de recadrage --}}
+        <div
+          id="cropper-modal"
+          class="hidden fixed inset-0 z-50 bg-background-dark/80 flex-col items-center justify-center p-4"
+        >
+          <div class="max-w-2xl w-full">
+            <img id="cropper-image" src="" class="max-h-[60vh] block" />
+          </div>
+          <div class="flex justify-center gap-4 mt-6">
+            <button type="button" id="cancel-crop" class="w-36 px-6 py-2 secondary-btn">
+              Annuler
+  </button>
+
+            <button type="button" id="confirm-crop" class="w-36 px-6 py-2 btn-social-auth">
+              Appliquer
+  </button>
+          </div>
+
+        </div>
+
+        {{-- Gestion de la Bannière --}}
+        <div class="relative h-48 bg-neutral-800 group">
+          <img id="banner-preview" src="{{ user.banner }}" class="w-full h-full object-cover opacity-80" />
+          <div class="absolute inset-0 flex items-center justify-center gap-4">
+            <label
+              for="banner-upload"
+              class="px-3 py-2 bg-black/50 rounded-full cursor-pointer hover:bg-black/70 transition"
+            >
+              <i class="fa-solid fa-camera text-white"></i>
+              <input
+                type="file"
+                id="banner-upload"
+                name="banner"
+                class="hidden profile-upload-input"
+                data-preview="banner-preview"
+                accept="image/*"
+              />
+            </label>
+
+            @if(user.bannerImage)
+              <button
+                type="button"
+                class="px-[0.8rem] py-2 bg-black/50 rounded-full hover:bg-black/70 transition text-red-500 profile-delete-btn"
+                data-type="Banner"
+                data-preview="banner-preview"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            @end
+          </div>
+        </div>
+
+        {{-- Gestion de l'Avatar --}}
+        <div class="px-4 relative -mt-16 mb-8">
+          <div
+            class="relative w-32 h-32 rounded-full border-4 border-black bg-neutral-900 overflow-hidden group"
+          >
+            <img id="avatar-preview" src="{{ user.avatar }}" class="w-full h-full object-cover opacity-80" />
+            <div class="absolute inset-0 flex items-center justify-center gap-2">
+              <label
+                for="avatar-upload"
+                class="px-2 py-[0.2rem] bg-black/40 rounded-full cursor-pointer hover:bg-black/60 transition"
+              >
+                <i class="fa-solid fa-camera text-white text-sm"></i>
+                <input
+                  type="file"
+                  id="avatar-upload"
+                  name="avatar"
+                  class="hidden profile-upload-input"
+                  data-preview="avatar-preview"
+                  accept="image/*"
+                />
+              </label>
+
+              @if(user.avatarUrl)
+                <button
+                  type="button"
+                  class="px-[0.55rem] py-[0.18rem] bg-black/40 rounded-full hover:bg-black/60 transition text-red-500 profile-delete-btn"
+                  data-type="Avatar"
+                  data-preview="avatar-preview"
+                >
+                  <i class="fa-solid fa-trash-can text-sm"></i>
+                </button>
+              @end
+            </div>
+          </div>
+        </div>
+
+        {{-- Champs de texte --}}
+        <div class="p-4 space-y-6">
+          <div class="space-y-6">
+            @component('components/flashes', { type: 'error' })
+            @endcomponent
+            @component('components/flashes', { type: 'success' })
+            @endcomponent
+            {{-- Augmentation du gap global pour respirer --}}
+
+            {{-- Identité --}}
+            @component('components/inputs', {
+            group: 'profile',
+            name: 'fullName',
+            value: user.fullName,
+            placeholder: 'Prénom et Nom'
+            })
+            @endcomponent
+            
+            {{-- Bio --}}
+            <div class="space-y-1">
+              <textarea
+                name="bio"
+                placeholder="Ajoutez votre bio"
+                maxlength="160"
+                class="w-full bg-black border {{ flashMessages.has('errors.bio') ? 'border-red-500' : 'border-neutral-800' }} rounded-md p-3 text-white focus:border-brand-primary outline-none transition resize-none min-h-[100px]"
+              >{{ old('bio') || user.bio || '' }}</textarea>
+              @if(flashMessages.has('errors.bio'))
+                <p class="text-red-500 text-xs">
+                  {{ flashMessages.get('errors.bio') }}
+                </p>
+              @endif
+            </div>
+
+            {{-- Localisation & URL --}}
+            @component('components/inputs', {
+            group: 'profile',
+            name: 'location',
+            value: user.location,
+            placeholder: 'Localisation'
+            })
+            @endcomponent
+            
+            @component('components/inputs', {
+            group: 'profile',
+            name: 'websiteUrl',
+            value: user.websiteUrl,
+            placeholder: 'Site Web (ex: https://...)',
+            type: 'url'
+            })
+            @endcomponent
+            
+            {{-- Section Sécurité --}}
+            <div class="pt-10 mt-4">
+              <h2 class="text-white font-bold text-xl mb-4">
+                Modifier les paramètres du compte
+              </h2>
+
+              <div class="space-y-6">
+
+                {{-- Email --}}
+                @component('components/inputs', {
+                group: 'profile',
+                name: 'email',
+                value: user.email,
+                placeholder: 'Adresse email',
+                type: 'email'
+                })
+                @endcomponent
+                
+                {{-- Nouveau Mot de Passe --}}
+                <div class="space-y-4 pt-4">
+                  {{-- Groupe vertical pour les mots de passe --}}
+                  <div class="space-y-2">
+                    <p class="text-sm text-neutral-500 leading-relaxed">
+                      Le mot de passe doit contenir entre 8 et 32 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial (par exemple : Kadea_2026!).
+                    </p>
+                    @component('components/inputs', {
+                    group: 'profile',
+                    name: 'password',
+                    type: 'password',
+                    placeholder: 'Nouveau mot de passe',
+                    })
+                    @endcomponent
+                  </div>
+
+                  @component('components/inputs', {
+                  group: 'profile',
+                  name: 'password_confirmation',
+                  type: 'password',
+                  placeholder: 'Confirmer le nouveau mot de passe',
+                  })
+                  @endcomponent
+                </div>
+
+                {{-- Zone de validation critique --}}
+                <div class="mt-4 pt-4 pb-10 bg-neutral-900/30">
+                  <p class="text-neutral-light text-semiBold mb-4">
+                    Confirmez votre identité pour modifier l'email ou le mot de passe :
+                  </p>
+                  @component('components/inputs', {
+                  group: 'profile',
+                  name: 'currentPassword',
+                  type: 'password',
+                  placeholder: 'Mot de passe actuel',
+                  })
+                  @endcomponent
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </form>
+    </div>
+  @end
+@end

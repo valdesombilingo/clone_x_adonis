@@ -16,6 +16,7 @@ const PasswordResetsController = () => import('#controllers/password_resets_cont
 const HomeController = () => import('#controllers/home_controller')
 const TweetsController = () => import('#controllers/tweets_controller')
 const LikesController = () => import('#controllers/likes_controller')
+const ProfilesController = () => import('#controllers/profiles_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -79,8 +80,13 @@ router
       // 3. Route pour les notifications
       router.get('/notifications', [HomeController, 'notifications']).as('notifications')
 
-      // 4. Route pour l'affichage du profil utilisateur
-      router.get('/profile', [HomeController, 'profile']).as('show_profile')
+      // 4. Routes profile
+      // Route pour l'affichage du profil utilisateur
+      router.get('/:username', [ProfilesController, 'showProfile']).as('show_profile')
+      // Route pour l'affichage page d'édition du profil
+      router.get('/settings/profile', [ProfilesController, 'editProfile']).as('edit_profile')
+      // Route pour la mise à jour du profil
+      router.put('/settings/profile', [ProfilesController, 'updateProfile']).as('update_profile')
     })
 
     // Routes Tweets

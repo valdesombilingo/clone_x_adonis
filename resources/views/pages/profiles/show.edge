@@ -1,0 +1,198 @@
+@layout.main()
+  @slot('main')
+    {{-- Page principale du profil --}}
+    <div id="profile-flux" class="min-h-screen">
+
+      {{-- =============================================================== --}}
+      {{-- ================= EN-TETE STICKY (PROFILE) ==================== --}}
+      {{-- =============================================================== --}}
+
+      <div class="sticky top-0 bg-background-dark/80 backdrop-blur-sm z-30 px-4 py-1 flex items-center">
+
+        {{-- Bouton de retour --}}
+        <a
+          href="{{ route('home') }}"
+          up-target="#profile-flux"
+          up-follow
+          class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-background-light inline-flex items-center"
+        >
+          <i class="fa-solid fa-arrow-left text-lg"></i>
+        </a>
+
+        <div>
+          <h1 class="font-bold text-xl truncate">
+            {{ user.fullName }}
+          </h1>
+          <span class="text-neutral-gray text-xs truncate">
+            {{ user.$extras.tweets_count }} posts
+          </span>
+        </div>
+      </div>
+
+      {{-- 2. Header du profil (Bannière, Avatar, Bio, Compteurs) --}}
+      <div class="relative">
+        {{-- Bannière --}}
+        <div class="h-48 w-full overflow-hidden">
+          <img src="{{ user.banner }}" class="w-full h-full object-cover" alt="Banner" />
+        </div>
+
+        <div class="px-4">
+          <div class="relative flex justify-between items-end -mt-16 mb-4">
+            {{-- Avatar --}}
+            <div class="w-32 h-32 rounded-full border-4 border-background-dark overflow-hidden">
+              <img src="{{ user.avatar }}" class="w-full h-full object-cover" alt="{{ user.userName }}" />
+            </div>
+
+            {{-- Bouton Éditer/Suivre --}}
+            @if(auth.user.id === user.id)
+              <a
+                href="{{ route('edit_profile') }}"
+                class="secondary-btn px-6 whitespace-nowrap"
+                up-submit
+                up-target="#main-content"
+              >
+                Éditer le profil
+              </a>
+            @else
+              <div class="flex gap-2">
+                <button
+                  class="px-4 py-2 bg-background-light text-background-dark rounded-full font-bold hover:bg-neutral-200 transition text-sm"
+                >
+                  Suivre
+                </button>
+              </div>
+            @endif
+          </div>
+
+          <div class="mb-4">
+            @component('components/flashes', { type: 'error' })
+            @endcomponent
+            @component('components/flashes', { type: 'success' })
+            @endcomponent
+            
+            <h2 class="font-bold text-xl">
+              {{ user.fullName }}
+            </h2>
+            <p class="text-neutral-gray">
+              {{ '@' + user.userName }}
+            </p>
+          </div>
+
+          @if(user.bio)
+            <p class="mb-4 text-background-light text-[0.938rem]">
+              {{{ linkify(user.bio) }}}
+            </p>
+          @endif
+          
+          {{-- Infos de profil (Localisation, Lien, Date) --}}
+          <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-[0.938rem] text-neutral-gray mb-4">
+            @if(user.location)
+              <div class="flex items-center gap-1">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>{{ user.location }}</span>
+              </div>
+            @endif
+            
+            @if(user.websiteUrl)
+              <div class="flex items-center">
+                <i class="fa-solid fa-link -rotate-45"></i>
+                <a href="{{ user.websiteUrl }}" target="_blank" class="text-brand-primary hover:underline">
+                  {{{ linkify(user.websiteUrl.replace('https://', '').replace('http://', '')) }}}
+                </a>
+              </div>
+            @endif
+            
+            <div class="flex items-center gap-1">
+              <i class="fa-regular fa-calendar-days"></i>
+              <span>A rejoint X en {{ user.createdAt.toFormat('LLLL yyyy', { locale: 'fr' }) }}</span>
+            </div>
+          </div>
+
+          {{-- Compteurs Follows --}}
+          <div class="flex gap-5 text-sm mb-4">
+            <a href="#" class="hover:underline">
+              <span class="font-bold">{{ user.followingCount }}</span>
+              <span class="text-neutral-gray">abonnements</span>
+            </a>
+            <a href="#" class="hover:underline">
+              <span class="font-bold">{{ user.followersCount }}</span>
+              <span class="text-neutral-gray">abonnés</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {{-- 3. Barre d'onglets (Sticky) --}}
+      <div
+        class="bg-background-dark/80 backdrop-blur-sm border-b border-neutral-dark sticky top-[53px] z-20"
+      >
+        <div class="flex justify-around h-16 sm:h-14">
+          @component('components/tabs', {
+            label: 'Posts',
+            tabKey: 'posts',
+            target: '#profile-flux',
+            activeTab: tab,
+            indicatorWidth: 'w-10',
+            url: route('show_profile', { username: user.userName }, { qs: { tab: 'posts' } })
+          })
+          @endcomponent
+          
+          @component('components/tabs', {
+            label: 'Réponses',
+            tabKey: 'replies',
+            target: '#profile-flux',
+            activeTab: tab,
+            indicatorWidth: 'w-16',
+            url: route('show_profile', { username: user.userName }, { qs: { tab: 'replies' } })
+          })
+          @endcomponent
+          
+          @component('components/tabs', {
+            label: 'J\'aime',
+            tabKey: 'likes',
+            target: '#profile-flux',
+            activeTab: tab,
+            indicatorWidth: 'w-12',
+            url: route('show_profile', { username: user.userName }, { qs: { tab: 'likes' } })
+          })
+          @endcomponent
+        </div>
+      </div>
+
+      {{-- ============================================================ --}}
+      {{-- ================= FLUX PRINCIPAL (PROFILE) ================= --}}
+      {{-- ============================================================ --}}
+
+      <div class="divide-y divide-neutral-dark">
+        @each(tweet in tweets)
+          @if(tab === 'replies')
+            @component('partials/feeds/profile_reply_card', { reply: tweet })
+            @endcomponent
+          @else
+            @component('partials/feeds/home_tweet_card', { tweet: tweet })
+            @endcomponent
+          @end
+        @else
+          {{-- Messages personnalisés si la liste est vide --}}
+          <div class="py-12 px-8 max-w-sm mx-auto text-center">
+            @if(tab === 'posts')
+              <p class="text-neutral-gray">
+                Aucun tweet posté pour le moment.
+              </p>
+            @elseif(tab === 'replies')
+              <p class="text-neutral-gray">
+                Aucune réponse pour le moment
+              </p>
+            @elseif(tab === 'likes')
+              <p class="text-neutral-gray">
+                Aucun tweet aimé pour le moment.
+              </p>
+            @endif
+          </div>
+        @endeach
+      </div>
+      {{-- Fin du div divide-y --}}
+    </div>
+    {{-- Fin du div #profile-flux --}}
+  @endslot
+@end

@@ -8,7 +8,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import Like from '#models/like'
 
 export default class LikesController {
-  async toggleLike({ auth, params, response }: HttpContext) {
+  async toggleLike({ auth, params, response, request, session }: HttpContext) {
     const user = auth.getUserOrFail()
     const tweetId = Number(params.id)
 
@@ -26,7 +26,15 @@ export default class LikesController {
       await Like.create({ userId: user.id, tweetId })
     }
 
-    // Redirection adaptée au mode Web Starter Session
-    return response.redirect().back()
+    // On récupère l'onglet depuis le referer pour le flasher en session
+    const referer = request.header('referer') || ''
+    const url = new URL(referer, 'http://localhost')
+    const currentTab = url.searchParams.get('tab')
+
+    if (currentTab) {
+      session.flash('activeTab', currentTab)
+    }
+
+    return response.redirect().toPath(referer || '/')
   }
 }

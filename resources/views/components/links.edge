@@ -4,7 +4,13 @@
 </a>
 
 @elseif(type === 'nav-link')
-  <a href="{{ href || '#' }}" up-follow up-target="{{ target }}" class="{{ class_name }}">    <i class="{{ icon || '' }}"></i>{{ label || '' }}</a>
-
+  <a
+    href="{{ href || '#' }}"
+    up-follow
+    up-target="{{ target }}"
+    onclick="{{ onclick_action || '' }}"
+    class="{{ class_name }}"
+  >
+    <i class="{{ icon || '' }}"></i>{{ label || '' }}
+  </a>
 @end
-

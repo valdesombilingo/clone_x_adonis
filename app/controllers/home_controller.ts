@@ -7,12 +7,12 @@ export default class HomeController {
   // Affichage 'home' fil d'actualité 'index'
   // =========================================================================
 
-  async index({ view, request, auth }: HttpContext) {
+  async index({ view, request, auth, session }: HttpContext) {
     // 1. Récupérer l'utilisateur connecté
     const user = auth.getUserOrFail()
 
     // 2. Récupérer l'onglet actif (défaut: 'for-you')
-    const tab = request.input('tab', 'for-you')
+    const tab = session.flashMessages.get('activeTab') || request.input('tab', 'for-you')
 
     // 3. Construire la requête
     const tweetsQuery = Tweet.query()
@@ -64,12 +64,5 @@ export default class HomeController {
    */
   async notifications({ view, auth }: HttpContext) {
     return view.render('pages/notifications', { user: auth.user })
-  }
-
-  /**
-   * Profil Utilisateur
-   */
-  async profile({ view, auth }: HttpContext) {
-    return view.render('pages/profile', { user: auth.user })
   }
 }

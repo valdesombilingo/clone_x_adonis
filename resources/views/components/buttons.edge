@@ -22,15 +22,4 @@
   <button type="{{ type_name || 'submit' }}" class="black-btn">
     {{ label }}
   </button>
-
-  {{-- Bouton secondaire  noir --}}
-@elseif(type === 'open-auth-modal-btn')
-  <a
-    href="{{ href || '#' }}"
-    class="{{ btn_class || '' }}"
-    up-layer="new"
-    up-mode="modal"
-    up-history="false"
-    up-target="#auth-modal"
-  >{{ label }}</a>
-@endif
+@end

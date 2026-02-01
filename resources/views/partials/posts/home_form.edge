@@ -6,7 +6,12 @@
 >
   {{ csrfField() }}
   {{-- Avatar de l'utilisateur --}}
-  <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+  <div
+    href="{{ route('show_profile', { username: auth.user.userName }) }}"
+    up-follow
+    up-target="#main-content"
+    class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+  >
     <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
   </div>
 
@@ -81,7 +86,7 @@
         {{ $messages.join(', ') }}
       </p>
     @else
-      {{-- 2. Sinon, on laisse la place pour l'erreur JavaScript (taille) --}}
+      {{-- 2. Sinon, l'erreur JavaScript (taille) --}}
       <p id="js-media-error" class="text-red-500 text-sm mt-1 hidden">
       </p>
     @end

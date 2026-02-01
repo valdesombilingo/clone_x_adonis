@@ -4,7 +4,12 @@
   onclick="if(!window.getSelection().toString() && !event.target.closest('button, a, form, input')) { up.visit('{{ route('show_tweet', { username: reply.user.userName, id: reply.id }) }}', { target: '#main-content' }) }"
 >
   {{-- Avatar --}}
-  <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+  <div
+    href="{{ route('show_profile', { username: reply.user.userName }) }}"
+    up-follow
+    up-target="#main-content"
+    class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
+  >
     <img src="{{ reply.user.avatar }}" class="w-full h-full object-cover" loading="lazy" />
   </div>
 

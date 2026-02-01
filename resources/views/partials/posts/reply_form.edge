@@ -13,9 +13,14 @@
   <div class="flex flex-col items-center flex-shrink-0">
     <div class="w-0.5 h-1 bg-neutral-800">
     </div>
-    <div class="w-12 h-12 rounded-full overflow-hidden">
+    <a
+      href="{{ route('show_profile', { username: auth.user.userName }) }}"
+      up-follow
+      up-target="#main-content"
+      class="w-12 h-12 rounded-full overflow-hidden"
+    >
       <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
-    </div>
+    </a>
   </div>
 
   <div class="flex-1 pt-1">
@@ -80,7 +85,7 @@
         {{ $messages.join(', ') }}
       </p>
     @else
-      {{-- 2. Sinon, on laisse la place pour l'erreur JavaScript (taille) --}}
+      {{-- 2. Sinon, l'erreur JavaScript (taille) --}}
       <p id="js-media-error" class="text-red-500 text-sm mt-1 hidden">
       </p>
     @end

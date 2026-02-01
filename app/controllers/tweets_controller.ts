@@ -86,7 +86,11 @@ export default class TweetsController {
           [user.id]
         )
       )
-      .firstOrFail()
+      .first()
+
+    if (!tweet) {
+      return response.redirect().toRoute('home')
+    }
 
     // État du tweet principal
     tweet.isLiked = Boolean(tweet.$extras.is_liked)
@@ -127,8 +131,9 @@ export default class TweetsController {
   // Supprimer un tweet 'destroyTweet'
   // =========================================================================
 
-  async destroyTweet({ params, auth, response, session }: HttpContext) {
+  async destroyTweet({ params, auth, response, session, request }: HttpContext) {
     const user = auth.getUserOrFail()
+
     const tweet = await Tweet.findOrFail(params.id)
 
     if (tweet.userId !== user.id) {
@@ -136,37 +141,44 @@ export default class TweetsController {
       return response.redirect().back()
     }
 
-    // 1. On stocke l'ID du parent et l'utilisateur du parent AVANT de supprimer
-    if (tweet.parentId) {
-      await tweet.load('parent', (query) => query.preload('user'))
-    }
-
+    // 1. Récuperation des infos du parent avant de supprimer
+    await tweet.load('parent', (q) => q.preload('user'))
     const parent = tweet.parent
     const mediaUrl = tweet.mediaUrl
 
-    // 2. Suppression physique
+    // 2. Suppression physique du fichier
     if (mediaUrl) {
       const absolutePath = app.publicPath(
         mediaUrl.startsWith('/') ? mediaUrl.substring(1) : mediaUrl
       )
       try {
         await fs.unlink(absolutePath)
-      } catch (e) {}
+      } catch (e) {
+        // Ne rien faire si le fichier n'existe pas
+      }
     }
 
-    // 3. Suppression en base
+    // 3. Suppression en base de données
     await tweet.delete()
 
     // 4. Redirection intelligente
-    if (parent && parent.user) {
-      // Si c'est une réponse, on retourne sur le tweet qui était au-dessus
+    session.flash('success', 'Tweet supprimé.')
+
+    // Cas A : On est sur un profil (on y reste)
+    const referer = request.header('referer') || ''
+    if (referer.includes(`/${user.userName}`)) {
+      return response.redirect().back()
+    }
+
+    // Cas B : Suppression une réponse dans la vue détail d'un tweet
+    if (parent) {
       return response.redirect().toRoute('show_tweet', {
         username: parent.user.userName,
         id: parent.id,
       })
-    } else {
-      // Si c'est un post principal (ou si le parent est introuvable), retour à l'accueil
-      return response.redirect().toRoute('home')
     }
+
+    // Cas C : Par défaut, retour à l'accueil
+    return response.redirect().toRoute('home')
   }
 }
