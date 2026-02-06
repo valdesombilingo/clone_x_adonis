@@ -17,6 +17,7 @@ const HomeController = () => import('#controllers/home_controller')
 const TweetsController = () => import('#controllers/tweets_controller')
 const LikesController = () => import('#controllers/likes_controller')
 const ProfilesController = () => import('#controllers/profiles_controller')
+const FollowsController = () => import('#controllers/follows_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -87,6 +88,10 @@ router
       router.get('/settings/profile', [ProfilesController, 'editProfile']).as('edit_profile')
       // Route pour la mise à jour du profil
       router.put('/settings/profile', [ProfilesController, 'updateProfile']).as('update_profile')
+      // Route pour suivre / ne plus suivre un utilisateur
+      router.post('/users/:id/follow', [FollowsController, 'toggleFollow']).as('toggle_follow')
+      // Route pour afficher la liste des abonnés / abonnements
+      router.get('/users/:username/follow', [FollowsController, 'showFollow']).as('show_follow')
     })
 
     // Routes Tweets

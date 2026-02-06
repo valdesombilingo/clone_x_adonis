@@ -1,4 +1,3 @@
-// app/controllers/profiles_controller.ts
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Tweet from '#models/tweet'
@@ -11,15 +10,26 @@ import hash from '@adonisjs/core/services/hash'
 export default class ProfilesController {
   async showProfile({ params, auth, view, request, session }: HttpContext) {
     const authUser = auth.getUserOrFail()
+
+    // 1. DÉFINITION DE L'ONGLET
     const tab = session.flashMessages.get('activeTab') || request.input('tab', 'posts')
 
+    // 2. RÉCUPÉRATION DU PROFIL
     const profileUser = await User.query()
       .where('userName', params.username)
       .withCount('tweets')
       .withCount('followers')
       .withCount('following')
+      // Vérifie que ces noms 'followers' et 'following' sont identiques au modèle
+      .preload('followers', (q) => q.where('followerId', authUser.id))
+      .preload('following', (q) => q.where('followingId', authUser.id))
       .firstOrFail()
 
+    // Injection de l'info de suivi pour Edge
+    profileUser.$extras.isFollowing = (profileUser.followers?.length || 0) > 0
+    profileUser.$extras.followsYou = (profileUser.following?.length || 0) > 0
+
+    // 3. PRÉPARATION DE LA REQUÊTE DES TWEETS
     const tweetsQuery = Tweet.query()
       .preload('user')
       .preload('parent', (q) => q.preload('user'))
@@ -35,17 +45,12 @@ export default class ProfilesController {
       .orderBy('createdAt', 'desc')
       .limit(500)
 
-    // --- LOGIQUE DE FILTRAGE ET PRELOAD ---
+    // 4. LOGIQUE DE FILTRAGE
     if (tab === 'posts') {
       tweetsQuery.where('userId', profileUser.id).whereNull('parentId')
     } else if (tab === 'replies') {
-      tweetsQuery
-        .where('userId', profileUser.id)
-        .whereNotNull('parentId')
-        // CRUCIAL : On charge le parent et l'auteur du parent pour le thread
-        .preload('parent', (query) => {
-          query.preload('user')
-        })
+      tweetsQuery.where('userId', profileUser.id).whereNotNull('parentId')
+      // Le preload parent est déjà fait globalement au-dessus
     } else if (tab === 'likes') {
       tweetsQuery.whereIn('id', (q) =>
         q.from('likes').select('tweet_id').where('user_id', profileUser.id)
@@ -53,7 +58,6 @@ export default class ProfilesController {
     }
 
     const tweets = await tweetsQuery
-
     tweets.forEach((t) => (t.isLiked = Boolean(t.$extras.is_liked)))
 
     return view.render('pages/profiles/show', {

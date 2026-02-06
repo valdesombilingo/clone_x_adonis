@@ -33,7 +33,7 @@
       Cette information ne sera pas affichée publiquement. Confirmez votre âge, même si ce compte est pour une entreprise ou un animal de compagnie.
     </p>
     @component('components/inputs', {
-            type: 'auth'
+      group: 'auth',
             name: 'date_of_birth',
             type: 'date'
     })
@@ -50,7 +50,7 @@
     </p>
 
     @component('components/inputs', {
-            type: 'auth'
+            group: 'auth',
             name: 'password',
             type: 'password',
             placeholder: 'Mot de passe (8 caractères minimum)'
@@ -58,7 +58,7 @@
     @endcomponent
           
     @component('components/inputs', {
-            type: 'auth'
+            group: 'auth',
             name: 'password_confirmation',
             type: 'password',
             placeholder: 'Confirmer le mot de passe'

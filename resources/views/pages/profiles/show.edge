@@ -12,8 +12,9 @@
         {{-- Bouton de retour --}}
         <a
           href="{{ route('home') }}"
-          up-target="#profile-flux"
           up-follow
+          up-target="#main-content"
+          up-history="true"
           class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-background-light inline-flex items-center"
         >
           <i class="fa-solid fa-arrow-left text-lg"></i>
@@ -29,95 +30,131 @@
         </div>
       </div>
 
-      {{-- 2. Header du profil (Bannière, Avatar, Bio, Compteurs) --}}
-      <div class="relative">
-        {{-- Bannière --}}
-        <div class="h-48 w-full overflow-hidden">
-          <img src="{{ user.banner }}" class="w-full h-full object-cover" alt="Banner" />
-        </div>
+      <div id="follow-section-{{ user.id }}">
+        {{-- 2. Header du profil (Bannière, Avatar, Bio, Compteurs) --}}
+        <div class="relative">
+          {{-- Bannière --}}
+          <div class="h-48 w-full overflow-hidden">
+            <img src="{{ user.banner }}" class="w-full h-full object-cover" alt="Banner" />
+          </div>
 
-        <div class="px-4">
-          <div class="relative flex justify-between items-end -mt-16 mb-4">
-            {{-- Avatar --}}
-            <div class="w-32 h-32 rounded-full border-4 border-background-dark overflow-hidden">
-              <img src="{{ user.avatar }}" class="w-full h-full object-cover" alt="{{ user.userName }}" />
-            </div>
+          <div class="px-4">
+            <div class="relative flex justify-between items-end -mt-16 mb-4">
+              {{-- Avatar --}}
+              <div class="w-32 h-32 rounded-full border-4 border-background-dark overflow-hidden">
+                <img src="{{ user.avatar }}" class="w-full h-full object-cover" alt="{{ user.userName }}" />
+              </div>
 
-            {{-- Bouton Éditer/Suivre --}}
-            @if(auth.user.id === user.id)
-              <a
-                href="{{ route('edit_profile') }}"
-                class="secondary-btn px-6 whitespace-nowrap"
-                up-submit
-                up-target="#main-content"
-              >
-                Éditer le profil
-              </a>
-            @else
-              <div class="flex gap-2">
-                <button
-                  class="px-4 py-2 bg-background-light text-background-dark rounded-full font-bold hover:bg-neutral-200 transition text-sm"
+              {{-- Bouton Éditer/Suivre --}}
+              @if(auth.user.id === user.id)
+                <a
+                  href="{{ route('edit_profile') }}"
+                  class="secondary-btn px-6 whitespace-nowrap"
+                  up-submit
+                  up-target="#main-content"
                 >
-                  Suivre
-                </button>
-              </div>
-            @endif
-          </div>
+                  Éditer le profil
+              </a>
+              @else
+                <form
+                  action="{{ route('toggle_follow', { id: user.id }) }}"
+                  method="POST"
+                  up-submit
+                  up-target="#follow-section-{{ user.id }}"
+                >
+                  {{ csrfField() }}
+                  @if(user.$extras.isFollowing)
+                    {{-- Bouton quand on est déjà abonné --}}
+                    <button
+                      type="submit"
+                      class="group py-2 border border-brand-secondary rounded-full font-semiBold text-white transition-all lg:hover:border-red-500/50 lg:hover:bg-red-500/10 lg:hover:text-red-500 w-32"
+                    >
+                      <span class="lg:group-hover:hidden">Abonné</span>
+                      <span class="hidden lg:group-hover:inline text-sm">Désabonner</span>
+                    </button>
+                  @else
+                    {{-- Bouton quand on n'est pas abonné --}}
+                    <button
+                      type="submit"
+                      class="font-semiBold py-2 btn-social-auth border border-neutral-dark lg:hover:bg-background-light/85 lg:hover:border-neutral-dark whitespace-nowrap {{ user.$extras.followsYou ? 'w-40' : 'w-32' }}"
+                    >
+                      {{ user.$extras.followsYou ? 'Suivre en retour' : 'Suivre' }}
+</button>
+                  @endif
+                </form>
 
-          <div class="mb-4">
-            @component('components/flashes', { type: 'error' })
-            @endcomponent
-            @component('components/flashes', { type: 'success' })
-            @endcomponent
-            
-            <h2 class="font-bold text-xl">
-              {{ user.fullName }}
-            </h2>
-            <p class="text-neutral-gray">
-              {{ '@' + user.userName }}
-            </p>
-          </div>
-
-          @if(user.bio)
-            <p class="mb-4 text-background-light text-[0.938rem]">
-              {{{ linkify(user.bio) }}}
-            </p>
-          @endif
-          
-          {{-- Infos de profil (Localisation, Lien, Date) --}}
-          <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-[0.938rem] text-neutral-gray mb-4">
-            @if(user.location)
-              <div class="flex items-center gap-1">
-                <i class="fa-solid fa-location-dot"></i>
-                <span>{{ user.location }}</span>
-              </div>
-            @endif
-            
-            @if(user.websiteUrl)
-              <div class="flex items-center">
-                <i class="fa-solid fa-link -rotate-45"></i>
-                <a href="{{ user.websiteUrl }}" target="_blank" class="text-brand-primary hover:underline">
-                  {{{ linkify(user.websiteUrl.replace('https://', '').replace('http://', '')) }}}
-                </a>
-              </div>
-            @endif
-            
-            <div class="flex items-center gap-1">
-              <i class="fa-regular fa-calendar-days"></i>
-              <span>A rejoint X en {{ user.createdAt.toFormat('LLLL yyyy', { locale: 'fr' }) }}</span>
+              @endif
             </div>
-          </div>
 
-          {{-- Compteurs Follows --}}
-          <div class="flex gap-5 text-sm mb-4">
-            <a href="#" class="hover:underline">
-              <span class="font-bold">{{ user.followingCount }}</span>
-              <span class="text-neutral-gray">abonnements</span>
-            </a>
-            <a href="#" class="hover:underline">
-              <span class="font-bold">{{ user.followersCount }}</span>
-              <span class="text-neutral-gray">abonnés</span>
-            </a>
+            <div class="mb-4">
+              @component('components/flashes', { type: 'error' })
+              @endcomponent
+              @component('components/flashes', { type: 'success' })
+              @endcomponent
+              
+              <h2 class="font-bold text-xl">
+                {{ user.fullName }}
+              </h2>
+              <p class="text-neutral-gray">
+                {{ '@' + user.userName }}
+              </p>
+            </div>
+
+            @if(user.bio)
+              <p class="mb-4 text-background-light text-[0.938rem]">
+                {{{ linkify(user.bio) }}}
+              </p>
+            @endif
+            
+            {{-- Infos de profil (Localisation, Lien, Date) --}}
+            <div class="flex flex-wrap items-center gap-y-1 gap-x-4 text-[0.938rem] text-neutral-gray mb-4">
+              @if(user.location)
+                <div class="flex items-center gap-1">
+                  <i class="fa-solid fa-location-dot"></i>
+                  <span>{{ user.location }}</span>
+                </div>
+              @endif
+              
+              @if(user.websiteUrl)
+                <div class="flex items-center">
+                  <i class="fa-solid fa-link -rotate-45"></i>
+                  <a href="{{ user.websiteUrl }}" target="_blank" class="text-brand-primary hover:underline">
+                    {{{ linkify(user.websiteUrl.replace('https://', '').replace('http://', '')) }}}
+                </a>
+                </div>
+              @endif
+              
+              <div class="flex items-center gap-1">
+                <i class="fa-regular fa-calendar-days"></i>
+                <span>A rejoint X en {{ user.createdAt.toFormat('LLLL yyyy', { locale: 'fr' }) }}</span>
+              </div>
+            </div>
+
+            {{-- Compteurs Follows --}}
+            <div class="flex gap-5 text-sm mb-4">
+              {{-- Lien vers les Abonnements (Following) --}}
+              <a
+                href="{{ route('show_follow', { username: user.userName }, { qs: { tab: 'following' } }) }}"
+                class="hover:underline decoration-white"
+                up-target="#main-content"
+                up-follow
+              >
+                <span class="font-bold text-white">{{ user.followingCount }}</span>
+                <span class="text-neutral-gray">abonnements</span>
+              </a>
+
+              {{-- Lien vers les Abonnés (Followers) --}}
+              <a
+                href="{{ route('show_follow', { username: user.userName }, { qs: { tab: 'followers' } }) }}"
+                class="hover:underline decoration-white"
+                up-target="#main-content"
+                up-follow
+              >
+                <span class="font-bold text-white">{{ user.followersCount }}</span>
+                <span class="text-neutral-gray">abonnés</span>
+              </a>
+            </div>
+
           </div>
         </div>
       </div>

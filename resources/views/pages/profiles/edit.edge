@@ -1,6 +1,6 @@
 @layout.main()
   @slot('main')
-    <div id="profile-edit" class="min-h-screen bg-black">
+    <div id="profile-edit" class="min-h-screen bg-background-dark">
 
       {{-- Formulaire --}}
       <form
@@ -18,7 +18,7 @@
         <input type="hidden" name="deleteAvatar" id="deleteAvatarInput" value="false" />
 
         <div
-          class="sticky top-0 bg-black/80 backdrop-blur-sm z-30 px-4 py-3 flex items-center justify-between"
+          class="sticky top-0 bg-background-dark/80 backdrop-blur-sm z-30 px-4 py-3 flex items-center justify-between"
         >
           <div class="flex items-center">
             <a
@@ -34,7 +34,10 @@
             </h1>
           </div>
 
-          <button type="submit" class="btn-social-auth w-28 sm:w-36 font-semiBold">Enregistrer</button>
+          <button
+            type="submit"
+            class="btn-social-auth w-28 sm:w-36 font-semiBold border-neutral-dark lg:hover:bg-background-light/85 lg:hover:border-neutral-dark"
+          >Enregistrer</button>
         </div>
 
         {{-- Modal de recadrage --}}
@@ -50,7 +53,11 @@
               Annuler
   </button>
 
-            <button type="button" id="confirm-crop" class="w-36 px-6 py-2 btn-social-auth">
+            <button
+              type="button"
+              id="confirm-crop"
+              class="w-36 px-6 py-2 btn-social-auth font-semiBold border-neutral-dark lg:hover:bg-background-light/85 lg:hover:border-neutral-dark"
+            >
               Appliquer
   </button>
           </div>
@@ -58,12 +65,12 @@
         </div>
 
         {{-- Gestion de la Bannière --}}
-        <div class="relative h-48 bg-neutral-800 group">
+        <div class="relative h-48 bg-neutral-dark group">
           <img id="banner-preview" src="{{ user.banner }}" class="w-full h-full object-cover opacity-80" />
           <div class="absolute inset-0 flex items-center justify-center gap-4">
             <label
               for="banner-upload"
-              class="px-3 py-2 bg-black/50 rounded-full cursor-pointer hover:bg-black/70 transition"
+              class="px-3 py-2 bg-background-dark/50 rounded-full cursor-pointer hover:bg-background-dark/70 transition"
             >
               <i class="fa-solid fa-camera text-white"></i>
               <input
@@ -79,7 +86,7 @@
             @if(user.bannerImage)
               <button
                 type="button"
-                class="px-[0.8rem] py-2 bg-black/50 rounded-full hover:bg-black/70 transition text-red-500 profile-delete-btn"
+                class="px-[0.8rem] py-2 bg-background-dark/50 rounded-full hover:bg-background-dark/70 transition text-red-500 profile-delete-btn"
                 data-type="Banner"
                 data-preview="banner-preview"
               >
@@ -92,13 +99,13 @@
         {{-- Gestion de l'Avatar --}}
         <div class="px-4 relative -mt-16 mb-8">
           <div
-            class="relative w-32 h-32 rounded-full border-4 border-black bg-neutral-900 overflow-hidden group"
+            class="relative w-32 h-32 rounded-full border-4 border-background-dark bg-neutral-900 overflow-hidden group"
           >
             <img id="avatar-preview" src="{{ user.avatar }}" class="w-full h-full object-cover opacity-80" />
             <div class="absolute inset-0 flex items-center justify-center gap-2">
               <label
                 for="avatar-upload"
-                class="px-2 py-[0.2rem] bg-black/40 rounded-full cursor-pointer hover:bg-black/60 transition"
+                class="px-2 py-[0.2rem] bg-background-dark/40 rounded-full cursor-pointer hover:bg-background-dark/60 transition"
               >
                 <i class="fa-solid fa-camera text-white text-sm"></i>
                 <input
@@ -114,7 +121,7 @@
               @if(user.avatarUrl)
                 <button
                   type="button"
-                  class="px-[0.55rem] py-[0.18rem] bg-black/40 rounded-full hover:bg-black/60 transition text-red-500 profile-delete-btn"
+                  class="px-[0.55rem] py-[0.18rem] bg-background-dark/40 rounded-full hover:bg-background-dark/60 transition text-red-500 profile-delete-btn"
                   data-type="Avatar"
                   data-preview="avatar-preview"
                 >
@@ -149,7 +156,7 @@
                 name="bio"
                 placeholder="Ajoutez votre bio"
                 maxlength="160"
-                class="w-full bg-black border {{ flashMessages.has('errors.bio') ? 'border-red-500' : 'border-neutral-800' }} rounded-md p-3 text-white focus:border-brand-primary outline-none transition resize-none min-h-[100px]"
+                class="w-full bg-background-dark border {{ flashMessages.has('errors.bio') ? 'border-red-500' : 'border-neutral-dark' }} rounded-md p-3 text-white focus:border-brand-primary outline-none transition resize-none min-h-[100px]"
               >{{ old('bio') || user.bio || '' }}</textarea>
               @if(flashMessages.has('errors.bio'))
                 <p class="text-red-500 text-xs">
@@ -198,7 +205,7 @@
                 <div class="space-y-4 pt-4">
                   {{-- Groupe vertical pour les mots de passe --}}
                   <div class="space-y-2">
-                    <p class="text-sm text-neutral-500 leading-relaxed">
+                    <p class="text-sm text-neutral-gray leading-relaxed">
                       Le mot de passe doit contenir entre 8 et 32 caractères, incluant une majuscule, une minuscule, un chiffre et un caractère spécial (par exemple : Kadea_2026!).
                     </p>
                     @component('components/inputs', {
