@@ -8,13 +8,18 @@ export default class HomeController {
   // =========================================================================
 
   async index({ view, request, auth, session }: HttpContext) {
-    // 1. Récupérer l'utilisateur connecté
     const user = auth.getUserOrFail()
-
-    // 2. Récupérer l'onglet actif (défaut: 'for-you')
     const tab = session.flashMessages.get('activeTab') || request.input('tab', 'for-you')
 
-    // 3. Construire la requête
+    // 1. RÉCUPÉRER TOUS LES IDS DE BLOCAGE
+    const blocks = await db
+      .from('blocks')
+      .where('blocker_id', user.id)
+      .select('blocked_id as id')
+      .union(db.from('blocks').where('blocked_id', user.id).select('blocker_id as id'))
+    const excludeIds = blocks.map((b) => b.id)
+
+    // 2. CONSTRUIRE LA REQUÊTE
     const tweetsQuery = Tweet.query()
       .whereNull('parentId')
       .preload('user')
@@ -29,22 +34,26 @@ export default class HomeController {
       .orderBy('createdAt', 'desc')
       .limit(500)
 
-    // 4. Logique de l'onglet Following (Abonnements)
+    // 3. EXCLURE LES TWEETS DES COMPTES BLOQUÉS / BLOQUANTS
+    if (excludeIds.length > 0) {
+      tweetsQuery.whereNotIn('userId', excludeIds)
+    }
+
+    // 4. LOGIQUE DE L'ONGLET FOLLOWING
     if (tab === 'following') {
       tweetsQuery.whereIn('userId', (query) => {
         query.from('follows').select('following_id').where('follower_id', user.id)
       })
     }
 
-    // 5. Exécuter la requête
+    // 5. EXÉCUTION DE LA REQUÊTE
     const tweets = await tweetsQuery
 
-    // 6. Transférer l'état de $extras vers le modèle pour Edge
+    // Transférer l'état de $extras vers le modèle pour Edge
     tweets.forEach((tweet) => {
       tweet.isLiked = Boolean(tweet.$extras.is_liked)
     })
 
-    // 7. Renvoyer la vue
     return view.render('pages/home', {
       tweets,
       tab,

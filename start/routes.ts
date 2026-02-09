@@ -93,6 +93,8 @@ router
       router.post('/users/:id/follow', [FollowsController, 'toggleFollow']).as('toggle_follow')
       // Route pour afficher la liste des abonnés / abonnements
       router.get('/users/:username/follow', [FollowsController, 'showFollow']).as('show_follow')
+      // Route pour bloquer / débloquer un utilisateur
+      router.post('/profiles/:id/block', [ProfilesController, 'toggleBlock']).as('toggle_block')
     })
 
     // Routes Tweets

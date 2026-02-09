@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import User from '#models/user'
 import Tweet from '#models/tweet'
+import Block from '#models/block'
 import db from '@adonisjs/lucid/services/db'
 import { updateProfileValidator } from '#validators/update_profile'
 import app from '@adonisjs/core/services/app'
@@ -10,26 +11,50 @@ import hash from '@adonisjs/core/services/hash'
 export default class ProfilesController {
   async showProfile({ params, auth, view, request, session }: HttpContext) {
     const authUser = auth.getUserOrFail()
-
-    // 1. DÉFINITION DE L'ONGLET
     const tab = request.input('tab') || session.flashMessages.get('activeTab') || 'posts'
 
-    // 2. RÉCUPÉRATION DU PROFIL
+    // 1. RÉCUPÉRATION DU PROFIL
     const profileUser = await User.query()
       .where('userName', params.username)
       .withCount('tweets')
       .withCount('followers')
       .withCount('following')
-      // Vérifie que ces noms 'followers' et 'following' sont identiques au modèle
       .preload('followers', (q) => q.where('followerId', authUser.id))
       .preload('following', (q) => q.where('followingId', authUser.id))
       .firstOrFail()
 
-    // Injection de l'info de suivi pour Edge
+    // 2. VÉRIFICATION DES BLOCAGES (MUTUELS)
+    const blockData = await db
+      .from('blocks')
+      .where((q) => q.where('blocker_id', authUser.id).andWhere('blocked_id', profileUser.id))
+      .orWhere((q) => q.where('blocker_id', profileUser.id).andWhere('blocked_id', authUser.id))
+      .first()
+
+    const iBlockedHim = blockData?.blocker_id === authUser.id
+    const heBlockedMe = blockData?.blocker_id === profileUser.id
+
+    if (iBlockedHim || heBlockedMe) {
+      return view.render('pages/profiles/show', {
+        user: profileUser,
+        tweets: [],
+        tab,
+        iBlockedHim,
+        heBlockedMe,
+      })
+    }
+
+    // 3. RÉCUPÉRATION DES IDS À EXCLURE POUR LE FILTRAGE DES TWEETS
+    const blocks = await db
+      .from('blocks')
+      .where('blocker_id', authUser.id)
+      .select('blocked_id as id')
+      .union(db.from('blocks').where('blocked_id', authUser.id).select('blocker_id as id'))
+    const excludeIds = blocks.map((b) => b.id)
+
     profileUser.$extras.isFollowing = (profileUser.followers?.length || 0) > 0
     profileUser.$extras.followsYou = (profileUser.following?.length || 0) > 0
 
-    // 3. PRÉPARATION DE LA REQUÊTE DES TWEETS
+    // 4. PRÉPARATION DE LA REQUÊTE
     const tweetsQuery = Tweet.query()
       .preload('user')
       .preload('parent', (q) => q.preload('user'))
@@ -45,16 +70,27 @@ export default class ProfilesController {
       .orderBy('createdAt', 'desc')
       .limit(500)
 
-    // 4. LOGIQUE DE FILTRAGE
+    // 5. LOGIQUE DE FILTRAGE PAR ONGLET + SÉCURITÉ BLOCAGE
     if (tab === 'posts') {
       tweetsQuery.where('userId', profileUser.id).whereNull('parentId')
     } else if (tab === 'replies') {
       tweetsQuery.where('userId', profileUser.id).whereNotNull('parentId')
-      // Le preload parent est déjà fait globalement au-dessus
+      // Ne pas montrer les réponses faites à des gens bloqués
+      if (excludeIds.length > 0) {
+        tweetsQuery.whereNotExists((q) => {
+          q.from('tweets as parents')
+            .whereRaw('parents.id = tweets.parent_id')
+            .whereIn('parents.user_id', excludeIds)
+        })
+      }
     } else if (tab === 'likes') {
       tweetsQuery.whereIn('id', (q) =>
         q.from('likes').select('tweet_id').where('user_id', profileUser.id)
       )
+      // Ne pas montrer les likes sur des tweets d'auteurs bloqués
+      if (excludeIds.length > 0) {
+        tweetsQuery.whereNotIn('userId', excludeIds)
+      }
     }
 
     const tweets = await tweetsQuery
@@ -64,6 +100,8 @@ export default class ProfilesController {
       user: profileUser,
       tweets,
       tab,
+      iBlockedHim: false,
+      heBlockedMe: false,
     })
   }
 
@@ -149,7 +187,7 @@ export default class ProfilesController {
       // 4. SAUVEGARDE
       user.merge(updateData)
 
-      // On vérifie si des changements ont été détectés (avant de sauvegarder)
+      // On vérifie si des changements ont été détectés avant de sauvegarder
       const hasChanges = user.$isDirty
 
       if (hasChanges) {
@@ -175,5 +213,44 @@ export default class ProfilesController {
       const filePath = app.publicPath(fileUrl.startsWith('/') ? fileUrl.substring(1) : fileUrl)
       await fs.unlink(filePath)
     } catch {}
+  }
+
+  // ---------------------------------------------------------
+  async toggleBlock({ auth, params, response, session }: HttpContext) {
+    const authUser = auth.getUserOrFail()
+    const targetId = Number(params.id)
+
+    if (authUser.id === targetId) {
+      return response.redirect().back()
+    }
+
+    // 1. Chercher si le blocage existe
+    const existingBlock = await Block.query()
+      .where('blockerId', authUser.id)
+      .where('blockedId', targetId)
+      .first()
+
+    if (existingBlock) {
+      await existingBlock.delete()
+      session.flash('success', 'Utilisateur débloqué.')
+    } else {
+      // 2. Créer le blocage + Supprimer les follows mutuels
+      await db.transaction(async (trx) => {
+        const block = new Block()
+        block.fill({ blockerId: authUser.id, blockedId: targetId })
+        block.useTransaction(trx)
+        await block.save()
+
+        // Supprime les follows dans les deux sens (on ne peut pas suivre qqun qu'on bloque ou qui nous bloque)
+        await trx
+          .from('follows')
+          .where((q) => q.where('follower_id', authUser.id).andWhere('following_id', targetId))
+          .orWhere((q) => q.where('follower_id', targetId).andWhere('following_id', authUser.id))
+          .delete()
+      })
+      session.flash('success', 'Utilisateur bloqué.')
+    }
+
+    return response.redirect().back()
   }
 }
