@@ -6,7 +6,7 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import type { HasMany } from '@adonisjs/lucid/types/relations'
 import PasswordReset from '#models/password_reset'
 import Tweet from '#models/tweet'
-import Follow from './follow.js'
+import Follow from '#models/follow'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],

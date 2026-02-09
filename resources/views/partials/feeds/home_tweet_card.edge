@@ -18,6 +18,20 @@
     </a>
 
     <div class="flex-1 min-w-0">
+
+      @if(tweet.parentId && tweet.parent?.user)
+        <div class="text-neutral-gray text-sm mb-0.5 flex items-center gap-1">
+          <span>En réponse à</span>
+          <a
+            href="{{ route('show_tweet', { username: tweet.parent.user.userName, id: tweet.parentId }) }}"
+            up-follow
+            up-target="#main-content"
+            class="text-brand-primary hover:underline"
+          >
+            {{ '@' + tweet.parent.user.userName }}
+          </a>
+        </div>
+      @end
       {{-- En-tête du tweet : nom, username, date et bouton de suppression --}}
       <div class="flex items-center gap-3">
 
@@ -123,14 +137,16 @@
         {{-- Formulaire pour liker/disliker le tweet --}}
         <div class="w-16">
           <form
-            action="{{ route('tweet_like', { id: tweet.id }) }}"
+            action="{{ route('tweet_like', { id: tweet.id }, { qs: { q: request.input('q'), tab: request.input('tab') } }) }}"
             method="POST"
             up-submit
             up-target="#tweet-{{ tweet.id }}"
             class="inline-block"
           >
             {{ csrfField() }}
-                      <button
+
+            
+            <button
               type="submit"
               class="flex items-center transition group outline-none {{ tweet.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }}"
             >

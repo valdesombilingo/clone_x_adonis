@@ -74,7 +74,7 @@
           onclick="window.scrollTo({ top: 0, behavior: 'smooth' }); return false;"
           class="text-brand-primary hover:underline"
         >
-          {{ tweet.user.userName }}
+          {{ '@' + tweet.user.userName }}
         </a>
       </span>
 
@@ -141,6 +141,8 @@
             up-target="#like-container-{{ reply.id }}"
           >
             {{ csrfField() }}
+            <input type="hidden" name="q" value="{{ query || '' }}" />
+            <input type="hidden" name="tab" value="{{ tab || '' }}" />
             <button
               type="submit"
               class="flex items-center group {{ reply.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }} transition-colors"

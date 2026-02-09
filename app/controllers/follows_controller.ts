@@ -78,12 +78,9 @@ export default class FollowsController {
       })
     }
 
-    // REDIRECTION INTELLIGENTE (Préserve les query params ?tab=...)
-    const referer = request.header('referer')
-    if (referer) {
-      return response.redirect().toPath(referer)
-    }
+    const queryParams = request.qs()
 
-    return response.redirect().back()
+    // On redirige en réinjectant ces paramètres
+    return response.redirect().withQs(queryParams).back()
   }
 }

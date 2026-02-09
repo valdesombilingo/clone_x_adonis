@@ -1,9 +1,116 @@
 @layout.main()
   @slot('main')
-    <div>
-      <h1>
-        search
-      </h1>
+    <div id="search-flux" class="min-h-screen">
+
+      {{-- =============================================================== --}}
+      {{-- ================= EN-TETE STICKY (SEARCH) ==================== --}}
+      {{-- =============================================================== --}}
+      <div
+        class="sticky top-0 bg-background-dark/80 backdrop-blur-sm z-30 px-4 py-4 flex items-center h-[72px]"
+      >
+        {{-- Bouton de retour --}}
+        <a
+          href="{{ route('home') }}"
+          up-follow
+          up-target="#main-content"
+          class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-2 text-background-light inline-flex items-center"
+        >
+          <i class="fa-solid fa-arrow-left text-lg"></i>
+        </a>
+
+        {{-- BARRE DE RECHERCHE --}}
+        <form
+          action="{{ route('search') }}"
+          method="GET"
+          class="flex-1 relative"
+          up-target="#search-flux"
+          up-submit
+        >
+          <input type="hidden" name="tab" value="{{ tab }}" />
+
+          <button
+            type="submit"
+            class="absolute inset-y-0 left-4 flex items-center text-neutral-gray hover:text-primary-blue transition-colors"
+            aria-label="Rechercher"
+          >
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+
+          <input
+            type="text"
+            name="q"
+            id="search-input"
+            value="{{ query || '' }}"
+            up-keep
+            up-autosubmit
+            up-delay="500"
+            placeholder="Chercher"
+            class="w-full bg-neutral-dark/50 border-none rounded-full py-3 pl-12 pr-4 text-background-light focus:border-brand-primary focus:ring-1 focus:ring-brand-primary outline-none transition-all duration-200 ease-in-out"
+          />
+        </form>
+      </div>
+
+      {{-- =============================================================== --}}
+      {{-- ================= BARRE D'ONGLETS (STICKY) =================== --}}
+      {{-- =============================================================== --}}
+      <div
+        class="bg-background-dark/80 backdrop-blur-sm border-b border-neutral-dark sticky top-[72px] z-20"
+      >
+        <div class="flex justify-around h-16 sm:h-14">
+          @component('components/tabs', {
+            label: 'Tendances',
+            tabKey: 'hashtags',
+            target: '#search-flux',
+            activeTab: tab,
+            indicatorWidth: 'w-20',
+          
+            url: route('search', {}, { qs: { q: query, tab: 'hashtags' } })
+          })
+          @endcomponent
+          
+          @component('components/tabs', {
+            label: 'Comptes',
+            tabKey: 'accounts',
+            target: '#search-flux',
+            activeTab: tab,
+            indicatorWidth: 'w-16',
+            url: route('search', {}, { qs: { q: query, tab: 'accounts' } })
+          })
+          @endcomponent
+        </div>
+      </div>
+
+      {{-- ============================================================ --}}
+      {{-- ================= FLUX PRINCIPAL (RESULTS) ================= --}}
+      {{-- ============================================================ --}}
+      <div class="divide-y divide-neutral-dark">
+        @if(query && results.length > 0)
+          @each(item in results)
+            @if(tab === 'hashtags')
+              @component('partials/feeds/home_tweet_card', { tweet: item, user: auth.user })
+              @endcomponent
+            @else
+            
+              @include('partials/feeds/follow_card')
+            @endif
+          @end
+        @else
+          {{-- Message d'état vide --}}
+          <div class="py-12 px-8 max-w-sm mx-auto text-center">
+            <h2 class="text-xl font-bold text-background-light mb-2">
+              {{ query ? 'Aucun résultat pour "' + query + '"' : 'Cherchez quelque chose' }}
+            </h2>
+            <p class="text-neutral-gray">
+              @if(!query)
+                Trouvez vos hashtags ou comptes favoris.
+              @else
+                Essayez de vérifier l'orthographe ou de chercher un autre mot-clé.
+              @endif
+            </p>
+          </div>
+        @endif
+      </div>
+
     </div>
   @endslot
 @end

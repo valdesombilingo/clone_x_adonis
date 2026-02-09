@@ -18,6 +18,7 @@ const TweetsController = () => import('#controllers/tweets_controller')
 const LikesController = () => import('#controllers/likes_controller')
 const ProfilesController = () => import('#controllers/profiles_controller')
 const FollowsController = () => import('#controllers/follows_controller')
+const SearchController = () => import('#controllers/searches_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -76,7 +77,7 @@ router
       router.get('/home', [HomeController, 'index']).as('home')
 
       // 2. Route pour les recherches d'utilisateurs et hashtags
-      router.get('/search', [HomeController, 'search']).as('search')
+      router.get('/search', [SearchController, 'search']).as('search')
 
       // 3. Route pour les notifications
       router.get('/notifications', [HomeController, 'notifications']).as('notifications')

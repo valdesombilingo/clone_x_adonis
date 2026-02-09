@@ -77,7 +77,7 @@
             onclick=event.stopPropagation
             class="text-brand-primary hover:underline"
           >
-            {{ reply.parent.user.userName }}
+            {{ '@' + reply.parent.user.userName }}
           </a>
         </span>
       @endif
@@ -143,6 +143,8 @@
             up-target="#like-container-{{ reply.id }}"
           >
             {{ csrfField() }}
+            <input type="hidden" name="q" value="{{ query || '' }}" />
+            <input type="hidden" name="tab" value="{{ tab || '' }}" />
             <button
               type="submit"
               class="flex items-center group {{ reply.isLiked ? 'text-red-500' : 'text-neutral-gray hover:text-red-500' }} transition-colors"

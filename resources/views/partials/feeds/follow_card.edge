@@ -1,0 +1,81 @@
+{{-- 1. Parent : On garde ta structure exacte --}}
+<div
+  class="px-4 py-6 flex justify-between items-start lg:hover:bg-neutral-dark/20 transition gap-4 relative"
+  up-href="{{ route('show_profile', { username: item.userName }) }}"
+  up-follow
+  up-target="#main-content"
+>
+
+  {{-- Zone Gauche : Image + Bloc Texte --}}
+  <div class="flex gap-3 min-w-0 flex-1">
+    {{-- Photo --}}
+    <img src="{{ item.avatar }}" class="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+
+    {{-- Conteneur Vertical : Noms et Bio --}}
+    <div class="min-w-0 flex flex-col">
+
+      {{-- Bloc Noms --}}
+      <div class="flex flex-col min-w-0 group/link">
+        <p class="font-bold text-white truncate group-hover/link:underline max-w-[160px]">
+          {{ item.fullName }}
+        </p>
+        <div class="flex items-center gap-2 w-full">
+          <p class="text-neutral-gray truncate text-[15px] min-w-0 max-w-[150px]">
+            {{ '@' + item.userName }}
+          </p>
+
+          @if(item.$extras.followsYou)
+            <span
+              class="bg-neutral-dark/50 text-neutral-gray text-[10px] px-1.5 py-0.5 rounded font-medium shrink-0"
+            >
+              Vous suit
+            </span>
+          @endif
+        </div>
+      </div>
+
+      {{-- BIO --}}
+      @if(item.bio)
+        <p class="text-white text-[15px] mt-1 line-clamp-2 leading-normal">
+          {{{ linkify(item.bio) }}}
+        </p>
+      @endif
+    </div>
+  </div>
+
+  {{-- Zone Droite --}}
+  @if(auth.user.id !== item.id)
+    <div
+      id="follow-profile-{{ item.id }}"
+      class="flex-shrink-0 relative z-10"
+      onclick="event.stopPropagation()"
+      Bryan
+    >
+      <form
+        action="{{ route('toggle_follow', { id: item.id }, { qs: { tab: tab || '', q: query || '' } }) }}"
+        method="POST"
+        up-submit
+        up-target="#follow-profile-{{ item.id }}"
+      >
+        {{ csrfField() }}
+        @if(item.$extras.isFollowing)
+          <button
+            type="submit"
+            class="group py-1.5 border border-brand-secondary rounded-full font-bold text-white transition-all lg:hover:border-red-500/50 lg:hover:bg-red-500/10 lg:hover:text-red-500 w-28 sm:w-32"
+            Bryan
+          >
+            <span class="lg:group-hover:hidden">Abonné</span>
+            <span class="hidden lg:group-hover:inline text-sm">Désabonner</span>
+          </button>
+        @else
+          <button
+            type="submit"
+            class="font-bold py-1.5 bg-white text-background-dark rounded-full hover:bg-neutral-200 transition-all whitespace-nowrap {{ item.$extras.followsYou ? 'w-36 sm:w-40' : 'w-24 sm:w-28' }}"
+          >
+            {{ item.$extras.followsYou ? 'Suivre en retour' : 'Suivre' }}
+          </button>
+        @endif
+      </form>
+    </div>
+  @endif
+</div>

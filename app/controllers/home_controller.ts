@@ -53,13 +53,6 @@ export default class HomeController {
   }
 
   /**
-   * Recherche
-   */
-  async search({ view, auth }: HttpContext) {
-    return view.render('pages/search', { user: auth.user })
-  }
-
-  /**
    * Notifications
    */
   async notifications({ view, auth }: HttpContext) {

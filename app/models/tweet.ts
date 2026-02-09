@@ -4,14 +4,17 @@ import {
   column,
   belongsTo,
   hasMany,
+  manyToMany,
   afterCreate,
   afterDelete,
   computed,
 } from '@adonisjs/lucid/orm'
 
-import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
+import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+
 import User from '#models/user'
-import Like from './like.js'
+import Like from '#models/like'
+import Hashtag from '#models/hashtag'
 
 export default class Tweet extends BaseModel {
   @column({ isPrimary: true })
@@ -109,6 +112,18 @@ export default class Tweet extends BaseModel {
 
   @hasMany(() => Like)
   declare likes: HasMany<typeof Like>
+
+  // Relation tweet_hashtags table pivot pour la relation many-to-many entre Tweet et Hashtag
+  @manyToMany(() => Hashtag, {
+    pivotTable: 'tweet_hashtags',
+    pivotForeignKey: 'tweet_id',
+    pivotRelatedForeignKey: 'hashtag_id',
+    pivotTimestamps: {
+      createdAt: 'created_at',
+      updatedAt: false,
+    },
+  })
+  declare hashtags: ManyToMany<typeof Hashtag>
   // ==========================================================
   // HOOKS Lucid pour gérer automatiquement les compteurs
   // ==========================================================

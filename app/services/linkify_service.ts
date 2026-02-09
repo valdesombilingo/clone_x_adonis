@@ -10,6 +10,13 @@ export function linkifyText(text: string): string {
     nl2br: true,
     className: 'text-brand-primary hover:underline',
 
+    // Permet le clic Unpoly sur les liens (ex: #hashtag ou @mention) sans recharger la page
+    attributes: {
+      'up-follow': 'true',
+      'up-target': '#main-content',
+      'up-history': 'true',
+    },
+
     // 2. Raccourcir affichage URLs trop longues (ex: https://site.com...)
     format: (value: string, type: string) => {
       if (type === 'url' && value.length > 30) {
@@ -20,8 +27,9 @@ export function linkifyText(text: string): string {
 
     // 3. Configuration des liens personnalisés
     formatHref: {
-      hashtag: (val: string) => `/search?q=${encodeURIComponent(val.substring(1))}`,
-      mention: (val: string) => `/profile/${val.substring(1)}`,
+      hashtag: (val: string) => `/search?q=${encodeURIComponent(val.substring(1))}&tab=hashtags`,
+      // Changer pour pointer vers /search avec l'onglet 'accounts'
+      mention: (val: string) => `/search?q=${encodeURIComponent(val.substring(1))}&tab=accounts`,
     },
 
     // 4. URLs classiques, ouvrir dans un nouvel onglet

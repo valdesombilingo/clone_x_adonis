@@ -3,10 +3,12 @@ import { HttpContext } from '@adonisjs/core/http'
 import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import Tweet from '#models/tweet'
-import { createTweetValidator, updateTweetValidator } from '#validators/tweet'
+import Hashtag from '#models/hashtag'
+import { createTweetValidator } from '#validators/tweet'
 import fs from 'node:fs/promises'
 import db from '@adonisjs/lucid/services/db'
-
+import linkifyIt from 'linkify-it'
+const linkify = new linkifyIt()
 /**
  * Contrôleur de tweets (CRUD) :
  * - Création et réponse (storeTweet)
@@ -33,7 +35,8 @@ export default class TweetsController {
       finalPath = `/uploads/${fileName}`
     }
 
-    await Tweet.create({
+    // 1. On stocke l'instance du Tweet créé
+    const tweet = await Tweet.create({
       content: payload.content,
       mediaUrl: finalPath,
       userId: user.id,
@@ -41,6 +44,33 @@ export default class TweetsController {
       retweetId: payload.retweetId,
     })
 
+    // 2. Extraction des hashtags avec Linkify
+    if (payload.content) {
+      const matches = linkify.match(payload.content)
+
+      if (matches) {
+        // Filtrer uniquement les hashtags et nettoyer le nom
+        const hashtagNames = matches
+          .filter((m) => m.schema === '#')
+          .map((m) => m.raw.slice(1).toLowerCase())
+
+        if (hashtagNames.length > 0) {
+          const uniqueNames = [...new Set(hashtagNames)]
+          const hashtagIds: number[] = []
+
+          for (const name of uniqueNames) {
+            // firstOrCreate évite les doublons dans la table 'hashtags'
+            const hashtag = await Hashtag.firstOrCreate({ name }, { name })
+            hashtagIds.push(hashtag.id)
+          }
+
+          // 3. Liaison automatique dans la table pivot 'tweet_hashtags'
+          await tweet.related('hashtags').attach(hashtagIds)
+        }
+      }
+    }
+
+    // 4. Gestion de la redirection
     if (payload.parentId) {
       const parent = await Tweet.query().where('id', payload.parentId).preload('user').first()
       if (parent) {
