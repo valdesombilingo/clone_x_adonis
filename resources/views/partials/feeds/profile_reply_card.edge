@@ -4,14 +4,14 @@
   onclick="if(!window.getSelection().toString() && !event.target.closest('button, a, form, input')) { up.visit('{{ route('show_tweet', { username: reply.user.userName, id: reply.id }) }}', { target: '#main-content' }) }"
 >
   {{-- Avatar --}}
-  <div
+  <a
     href="{{ route('show_profile', { username: reply.user.userName }) }}"
     up-follow
     up-target="#main-content"
     class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0"
   >
     <img src="{{ reply.user.avatar }}" class="w-full h-full object-cover" loading="lazy" />
-  </div>
+  </a>
 
   {{-- Contenu de la réponse --}}
   <div class="flex-1 min-w-0">
@@ -137,9 +137,10 @@
         {{-- Like --}}
         <div id="like-container-{{ reply.id }}">
           <form
-            action="{{ route('tweet_like', { id: reply.id }) }}"
+            action="{{ route('tweet_like', { id: reply.id }, { qs: { tab: 'replies' } }) }}"
             method="POST"
             up-submit
+            up-scroll="false"
             up-target="#like-container-{{ reply.id }}"
           >
             {{ csrfField() }}

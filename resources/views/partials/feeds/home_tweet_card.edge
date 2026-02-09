@@ -140,6 +140,7 @@
             action="{{ route('tweet_like', { id: tweet.id }, { qs: { q: request.input('q'), tab: request.input('tab') } }) }}"
             method="POST"
             up-submit
+            up-scroll="false"
             up-target="#tweet-{{ tweet.id }}"
             class="inline-block"
           >

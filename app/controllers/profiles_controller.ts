@@ -12,7 +12,7 @@ export default class ProfilesController {
     const authUser = auth.getUserOrFail()
 
     // 1. DÉFINITION DE L'ONGLET
-    const tab = session.flashMessages.get('activeTab') || request.input('tab', 'posts')
+    const tab = request.input('tab') || session.flashMessages.get('activeTab') || 'posts'
 
     // 2. RÉCUPÉRATION DU PROFIL
     const profileUser = await User.query()
