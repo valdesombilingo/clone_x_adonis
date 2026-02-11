@@ -3,6 +3,7 @@
   method="POST"
   enctype="multipart/form-data"
   class="hidden sm:flex p-4 border-b border-neutral-dark gap-4"
+  novalidate
 >
   {{ csrfField() }}
   {{-- Avatar de l'utilisateur --}}
@@ -23,6 +24,7 @@
       placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
       class="tweet-textarea"
       rows="2"
+      autofocus
     >{{ old('content') || '' }}</textarea>
 
     {{-- Aperçu du média (image/vidéo) avant publication --}}

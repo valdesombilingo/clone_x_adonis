@@ -10,7 +10,8 @@ import db from '@adonisjs/lucid/services/db'
 import linkifyIt from 'linkify-it'
 const linkify = new linkifyIt()
 /**
- * Contrôleur de tweets (CRUD) :
+ * Contrôleur de tweets :
+ * - Affiche la page de création d'un tweet (createTweet)
  * - Création et réponse (storeTweet)
  * - Voir un tweet (showTweet)
  * - Voir la page reply (showReplyTweetForm)
@@ -18,6 +19,18 @@ const linkify = new linkifyIt()
  */
 
 export default class TweetsController {
+  // =========================================================================
+  // Affiche la page de création d'un tweet 'createTweet'
+  // =========================================================================
+
+  async createTweet({ view, auth }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    return view.render('pages/tweets/create', {
+      user,
+    })
+  }
+
   // =========================================================================
   // Création d'un tweet ou d'une réponse 'storeTweet'
   // =========================================================================

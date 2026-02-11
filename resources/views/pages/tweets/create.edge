@@ -1,0 +1,115 @@
+@layout.main()
+  @slot('main')
+    <div id="main-content" class="min-h-screen bg-background-dark">
+
+      {{-- 1. HEADER STICKY --}}
+      <div
+        class="sticky top-0 bg-background-dark/80 backdrop-blur-sm z-30 px-4 py-3 flex items-center justify-between"
+      >
+        <div class="flex items-center">
+          <a
+            href="{{ route('home') }}"
+            up-follow
+            up-target="#main-content"
+            class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center transition"
+          >
+            <i class="fa-solid fa-arrow-left text-lg"></i>
+          </a>
+          <h1 class="font-bold text-xl text-white">
+            Poster un tweet
+          </h1>
+        </div>
+
+        {{-- Ce bouton déclenche le formulaire grâce à l'attribut form --}}
+        <button type="submit" form="tweet-form" class="primary-btn w-28 sm:w-36 px-0">
+          Poster
+        </button>
+      </div>
+
+      {{-- 2. ZONE DE RÉDACTION --}}
+      <div class="p-4 flex gap-4">
+        {{-- Avatar --}}
+        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+          <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
+        </div>
+
+        <div class="flex-1">
+          <form
+            id="tweet-form"
+            action="{{ route('store_tweet') }}"
+            method="POST"
+            enctype="multipart/form-data"
+            up-submit
+            up-target="#main-content"
+            novalidate
+          >
+            {{ csrfField() }}
+            {{-- Textarea --}}
+            <textarea
+              name="content"
+              placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
+              class="tweet-textarea min-h-[50px]"
+              rows="2"
+              autofocus
+            >{{ old('content') || '' }}</textarea>
+
+            {{-- Aperçu du média --}}
+            <div
+              id="preview-container"
+              class="hidden relative mt-3 mb-2 w-fit max-w-full mx-auto overflow-hidden rounded-2xl border border-neutral-dark"
+            >
+              <img id="image-preview" class="hidden" />
+              <video id="video-preview" class="hidden" controls>
+              </video>
+
+              {{-- Bouton pour supprimer le média de l'aperçu --}}
+              <button type="button" id="remove-media" class="close-media">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            {{-- Affichage des erreurs de validation du contenu --}}
+            @inputError('content')
+              <p class="error-message">
+                {{ $messages.join(', ') }}
+              </p>
+            @end
+            
+            {{-- Barre d'outils pour les icônes et bouton d'envoi --}}
+            <div class="flex justify-between items-center mt-2 border-t border-neutral-light/20">
+
+              {{-- Icônes d'actions (média et emoji) --}}
+              <div class="flex gap-4 text-lg items-center">
+
+                {{-- Icône pour ajouter un média (image/vidéo) --}}
+                <label>
+                  <i class="fa-regular fa-image post-icon"></i>
+                  <input type="file" name="mediaUrl" class="hidden" accept="image/*,video/*" />
+                </label>
+
+                {{-- Icône pour ajouter un emoji --}}
+                <div class="relative">
+                  <i id="emoji-button" class="fa-regular fa-face-smile post-icon"></i>
+                  <div id="emoji-picker-container" class="absolute z-50 top-full left-0 mt-2 hidden">
+                    <emoji-picker locale="fr" class="dark">
+                    </emoji-picker>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {{-- Erreurs Média --}}
+            @inputError('mediaUrl')
+              <p class="text-red-500 text-sm mt-2">
+                {{ $messages.join(', ') }}
+              </p>
+            @else
+              <p id="js-media-error" class="text-red-500 text-sm mt-2 hidden">
+              </p>
+            @end
+          </form>
+        </div>
+      </div>
+    </div>
+  @endslot
+@end

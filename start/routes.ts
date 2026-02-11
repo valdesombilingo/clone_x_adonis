@@ -104,15 +104,15 @@ router
         .get('/:username/tweets/:id/reply', [TweetsController, 'showReplyTweetForm'])
         .as('show_reply_tweet')
 
-      // 1. Route pour poster un tweet
+      // 1. Route pour voit la page poster un tweet
+      router.get('/compose/tweet', [TweetsController, 'createTweet']).as('post_tweet')
+      // 2. Route pour poster un tweet
       router.post('/tweets', [TweetsController, 'storeTweet']).as('store_tweet')
-
-      // 2. Route pour supprimer un tweet
+      // 3. Route pour supprimer un tweet
       router.delete('/tweets/:id', [TweetsController, 'destroyTweet']).as('destroy_tweet')
-
-      // 3.  Route pour liker/unliker un tweet
+      // 4.  Route pour liker/unliker un tweet
       router.post('/tweets/:id/like', [LikesController, 'toggleLike']).as('tweet_like')
-      // 4. Route pour afficher un tweet spécifique
+      // 5. Route pour afficher un tweet spécifique
       router.get('/:username/tweets/:id', [TweetsController, 'showTweet']).as('show_tweet')
     })
   })
