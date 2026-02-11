@@ -63,7 +63,13 @@
         @else
           <div class="py-12 px-8 text-center">
             <p class="text-neutral-gray text-lg">
-              Aucun utilisateur ici pour le moment.
+              @if(tab === 'followers')
+                Aucun abonné pour le moment.
+              @elseif(tab === 'following')
+                Aucun abonnement pour le moment.
+              @else
+                Aucun utilisateur ici pour le moment.
+              @endif
             </p>
           </div>
         @endeach

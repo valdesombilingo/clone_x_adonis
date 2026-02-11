@@ -108,9 +108,5 @@
 }
 
 .scale-icon {
-  @apply lg:transition-transform lg:active:scale-110 origin-center;
+  @apply lg:transition-transform lg:active:scale-105 origin-center;
 }
-
-/* .card-scroll {
-  scrollbar-gutter: stable;
-} */

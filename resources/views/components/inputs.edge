@@ -1,18 +1,32 @@
 @if(group === 'auth')
   <div class="flex flex-col gap-1 w-full">
-    <input
-      type="{{ type || 'text' }}"
-      name="{{ name }}"
-      id="{{ name }}"
-      placeholder="{{ placeholder || '' }}"
-      class="input {{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'input-base' }}"
-      value="{{ old(name) || '' }}"
-      aria-describedby="{{ name }}-error"
-    />
+    <div class="relative flex items-center w-full">
+      <input
+        type="{{ type || 'text' }}"
+        name="{{ name }}"
+        id="{{ name }}"
+        placeholder="{{ placeholder || '' }}"
+        class="input {{ subgroup === 'password-light-mode' ? 'pr-10' : '' }} {{ flashMessages.has('errorsBag.' + name) ? 'input-error' : 'input-base' }}"
+        value="{{ old(name) || '' }}"
+        aria-describedby="{{ name }}-error"
+      />
+
+      @if(subgroup === 'password-light-mode')
+        <button
+          data-toggle-password
+          type="button"
+          onclick="togglePasswordRelatively(this)"
+          class="absolute right-3 text-brand-secondary px-[0.4rem] py-[0.1rem] rounded-xl lg:hover:bg-brand-secondary/10 transition-colors outline-none scale-icon"
+          tabindex="-1"
+        >
+          <i class="fa-regular fa-eye text-sm"></i>
+        </button>
+      @endif
+    </div>
 
     @inputError(name)
       @each(message in $messages)
-        <p id="{{ name }}-error" class="text-red-500 text-xs ml-1">
+        <p id="{{ name }}-error" class="text-red-500 text-xs ml-1 mt-1">
           {{ message }}
         </p>
       @end
@@ -21,15 +35,30 @@
 
 @elseif(group === 'profile')
   <div class="flex flex-col gap-1 w-full">
-    <input
-      type="{{ type || 'text' }}"
-      name="{{ name }}"
-      id="{{ name }}"
-      placeholder="{{ placeholder || '' }}"
-      class="{{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'border-neutral-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary' }} bg-black text-white p-4 rounded-md border w-full brand-secondary outline-none transition-all duration-200 ease-in-out"
-      value="{{ old(name) || value || '' }}"
-      aria-describedby="{{ name }}-error"
-    />
+    {{-- On ajoute cette div relative pour que l'icône puisse se positionner par-dessus l'input --}}
+    <div class="relative flex items-center w-full">
+      <input
+        type="{{ type || 'text' }}"
+        name="{{ name }}"
+        id="{{ name }}"
+        placeholder="{{ placeholder || '' }}"
+        class="{{ subgroup === 'password-dark-mode' ? 'pr-10' : '' }} {{ flashMessages.has('inputErrorsBag.' + name) ? 'input-error' : 'border-neutral-800 focus:border-brand-primary focus:ring-1 focus:ring-brand-primary' }} bg-black text-white p-4 rounded-md border w-full brand-secondary outline-none transition-all duration-200 ease-in-out"
+        value="{{ old(name) || value || '' }}"
+        aria-describedby="{{ name }}-error"
+      />
+
+      @if(subgroup === 'password-dark-mode')
+        <button
+          data-toggle-password
+          type="button"
+          onclick="togglePasswordRelatively(this)"
+          class="absolute right-3 text-brand-secondary px-[0.4rem] py-[0.1rem] rounded-xl lg:hover:bg-brand-secondary/15 transition-colors outline-none scale-icon"
+          tabindex="-1"
+        >
+          <i class="fa-regular fa-eye text-sm"></i>
+        </button>
+      @endif
+    </div>
 
     @inputError(name)
       @each(message in $messages)
@@ -40,3 +69,4 @@
     @end
   </div>
 @endif
+
