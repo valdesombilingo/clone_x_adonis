@@ -3,6 +3,11 @@ import Follow from '#models/follow'
 import User from '#models/user'
 
 export default class FollowsController {
+  /**
+   * Contrôleur de follow :
+   * - Affichage liste des abonnés ou abonnements (showFollow)
+   * - Méthode Toggle (Suivre / Se désabonner) (toggleFollow)
+   */
   // =========================================================================
   //  Affiche la liste des abonnés ou abonnements 'showFollow'
   // =========================================================================

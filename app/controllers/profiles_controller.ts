@@ -8,7 +8,17 @@ import app from '@adonisjs/core/services/app'
 import fs from 'node:fs/promises'
 import hash from '@adonisjs/core/services/hash'
 
+/**
+ * Contrôleur de Profil :
+ * - Affichage du profil (showProfile)
+ * - Affichage édition du profil (editProfile)
+ * - Mise à jour du profil (updateProfile)
+ * - Blocage et déblocage d'un utilisateur (toggleBlock)
+ */
 export default class ProfilesController {
+  // =========================================================================
+  // Affichage du profil utilisateur 'showProfile'
+  // =========================================================================
   async showProfile({ params, auth, view, request, session }: HttpContext) {
     const authUser = auth.getUserOrFail()
     const tab = request.input('tab') || session.flashMessages.get('activeTab') || 'posts'
@@ -105,16 +115,19 @@ export default class ProfilesController {
     })
   }
 
-  // ---------------------------------------------------------
+  // =========================================================================
+  // Affichage de la page d'édition du profil 'editProfile'
+  // =========================================================================
+
   async editProfile({ view, auth }: HttpContext) {
-    // On récupère l'utilisateur connecté via le middleware auth
     const user = auth.getUserOrFail()
 
-    // On retourne la vue sans infos dans l'URL
     return view.render('pages/profiles/edit', { user })
   }
 
-  // ---------------------------------------------------------
+  // =========================================================================
+  // Mise à jour du profil 'updateProfile'
+  // =========================================================================
 
   async updateProfile({ request, auth, response, session }: HttpContext) {
     const user = auth.getUserOrFail()
@@ -153,7 +166,7 @@ export default class ProfilesController {
         }
       }
 
-      // 2. TRAITEMENT DES FICHIERS (Avatar / Banner)
+      // 2. TRAITEMENT DES FICHIERS (Avatar et Banner)
       if (deleteAvatar && user.avatarUrl) {
         await this.removeFile(user.avatarUrl)
         user.avatarUrl = null
@@ -187,7 +200,7 @@ export default class ProfilesController {
       // 4. SAUVEGARDE
       user.merge(updateData)
 
-      // On vérifie si des changements ont été détectés avant de sauvegarder
+      // Vérification si des changements ont été détectés avant de sauvegarder
       const hasChanges = user.$isDirty
 
       if (hasChanges) {
@@ -205,7 +218,7 @@ export default class ProfilesController {
     }
   }
 
-  // --- HELPERS ---
+  // ----------------------- HELPERS -----------------------
 
   private async removeFile(fileUrl: string) {
     if (!fileUrl || fileUrl.startsWith('http')) return
@@ -215,7 +228,10 @@ export default class ProfilesController {
     } catch {}
   }
 
-  // ---------------------------------------------------------
+  // =========================================================================
+  // Logique de blocage et déblocage d'un utilisateur 'toggleBlock'
+  // =========================================================================
+
   async toggleBlock({ auth, params, response, session }: HttpContext) {
     const authUser = auth.getUserOrFail()
     const targetId = Number(params.id)
@@ -234,7 +250,7 @@ export default class ProfilesController {
       await existingBlock.delete()
       session.flash('success', 'Utilisateur débloqué.')
     } else {
-      // 2. Créer le blocage + Supprimer les follows mutuels
+      // 2. Créer le blocage et Supprimer les follows mutuels
       await db.transaction(async (trx) => {
         const block = new Block()
         block.fill({ blockerId: authUser.id, blockedId: targetId })

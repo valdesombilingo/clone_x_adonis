@@ -7,16 +7,18 @@
 
 <div class="flex flex-col gap-3 w-full">
   @component('components/buttons', {
-                        type: 'social',
-                        img: '/images/logos/google-icon.svg',
-                        label: "Se connecter avec Google"
+                        type: 'social-auth',
+                        route_name: 'social_redirect',
+                        provider: 'google',
+                        img: '/images/logos/google-icon.svg'
+                        
   })
   @endcomponent
                         
   @component('components/buttons', {
-                        type: 'social',
-                        img: '/images/logos/apple-icon.svg',
-                        label: "Se connecter avec Apple"
+                        type: 'social-auth',
+                        route_name: 'social_redirect',
+                        provider: 'github'
   })
   @endcomponent
         

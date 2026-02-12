@@ -5,6 +5,17 @@
     <span>{{ label }}</span>
   </button>
 
+@elseif(type === 'social-auth')
+  <a href="{{ route(route_name, { provider: provider }) }}" class="btn-social-auth">
+    @if(provider === 'google')
+      <img src="{{ img }}" class="w-5 h-5" alt="Google" />
+      <span>S'inscrire avec Google</span>
+    @elseif(provider === 'github')
+      <i class="fa-brands fa-github text-xl"></i>
+      <span>S'inscrire avec GitHub</span>
+    @endif
+  </a>
+
   {{-- Bouton primaire (Créer un compte, etc.) --}}
 @elseif(type === 'primary')
   <a href="{{ route('register') }}" class="primary-btn">

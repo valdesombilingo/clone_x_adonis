@@ -56,7 +56,7 @@ export default class PasswordResetsController {
       })
     }
 
-    // Message flash (UX sécurisée)
+    // Message flash
     session.flash(
       'success',
       'Lien de réinitialisation envoyé. Veuillez vérifier vos emails ou vos spams.'

@@ -9,7 +9,7 @@ export default class extends BaseSchema {
 
       // Champs d'authentification de base
       table.string('email', 255).notNullable().unique()
-      table.string('password', 255).notNullable()
+      table.string('password', 255).nullable()
       table.string('user_name', 50).notNullable().unique().comment('@utilisateur')
       table.string('full_name', 100).notNullable()
       table.date('date_of_birth').nullable()

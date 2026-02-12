@@ -22,7 +22,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare email: string
 
   @column({ serializeAs: null })
-  declare password: string
+  declare password: string | null
 
   @column()
   declare userName: string
@@ -41,14 +41,32 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare avatarUrl: string | null
 
   get avatar() {
-    return this.avatarUrl || '/images/backgrounds/default-profile-avatar.png'
+    if (!this.avatarUrl) {
+      return '/images/backgrounds/default-profile-avatar.png'
+    }
+
+    // Si c'est une URL complète (Google/GitHub), on la retourne telle quelle
+    if (this.avatarUrl.startsWith('http')) {
+      return this.avatarUrl
+    }
+
+    // Sinon, on ajoute le préfixe pour nos images locales
+    return `/uploads/${this.avatarUrl}`
   }
 
   @column()
   declare bannerImage: string | null
 
   get banner() {
-    return this.bannerImage || '/images/backgrounds/defaut-profile-banner.png'
+    if (!this.bannerImage) {
+      return '/images/backgrounds/defaut-profile-banner.png'
+    }
+
+    if (this.bannerImage.startsWith('http')) {
+      return this.bannerImage
+    }
+
+    return `/uploads/${this.bannerImage}`
   }
 
   @column()

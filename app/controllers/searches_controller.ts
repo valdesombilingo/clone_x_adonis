@@ -3,20 +3,27 @@ import db from '@adonisjs/lucid/services/db'
 import User from '#models/user'
 import Tweet from '#models/tweet'
 
+/**
+ * Contrôleur de Recherche (Searches) :
+ * - Affichage et logique de recherche (search)
+ */
 export default class SearchController {
+  // =========================================================================
+  // Affichage et logique de recherche 'search'
+  // =========================================================================
   async search({ request, view, auth, session }: HttpContext) {
     const user = auth.getUserOrFail()
     const query = request.input('q', '').trim()
 
-    // On récupère l'onglet (priorité à la session flash pour Unpoly, puis à l'input)
+    // On récupère l'onglet
     const tab = request.input('tab') || session.flashMessages.get('activeTab') || 'hashtags'
 
-    // Si la requête est vide, on renvoie une liste vide
+    // Si la requête est vide, renvoie d'une liste vide
     if (!query) {
       return view.render('pages/search', { query: '', tab, results: [], user })
     }
 
-    // --- 1. RÉCUPÉRATION DES IDS BLOQUÉS (Pour l'onglet Hashtags seulement) ---
+    // 1. RÉCUPÉRATION DES IDS BLOQUÉS
     const blocksAsBlocker = await db
       .from('blocks')
       .where('blocker_id', user.id)
@@ -66,7 +73,7 @@ export default class SearchController {
         u.$extras.heBlockedMe = Boolean(u.$extras.he_blocked_me) // Ajouté
       })
     } else {
-      // --- LOGIQUE ONGLET HASHTAGS (TWEETS) ---
+      // LOGIQUE ONGLET HASHTAGS (TWEETS)
       const tweetQuery = Tweet.query().where((mainQuery) => {
         const cleanQuery = query.startsWith('#') ? query.slice(1) : query
         mainQuery
