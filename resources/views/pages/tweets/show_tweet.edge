@@ -10,12 +10,9 @@
       >
 
         {{-- lien de retour  --}}
-        @component('components/links', {
-                    type: 'nav-link',
-                    href: (tweet.parentId && tweet.parent?.user?.userName) ? route('show_tweet', { username: tweet.parent.user.userName, id: tweet.parentId }) : route('home'),
-                    target: '#main-content',
-                    class_name: 'py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center transition',
-                    icon: 'fa-solid fa-arrow-left text-lg'
+        @component('components/buttons', {
+            type: 'back',
+            class_name: 'back-btn'
         })
         @endcomponent
         

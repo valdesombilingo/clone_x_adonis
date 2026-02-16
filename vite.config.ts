@@ -14,6 +14,7 @@ export default defineConfig({
         'resources/js/emoji_picker.js',
         'resources/js/profile_preview.js',
         'resources/js/Password_relatively.js',
+        'resources/js/tweet_form.js',
       ],
 
       /**

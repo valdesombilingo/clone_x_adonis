@@ -73,7 +73,7 @@
 
       {{-- Contenu textuel du tweet --}}
       @if(tweet.content)
-        <p class="mt-1 text-neutral-light">
+        <p class="mt-1 text-neutral-light break-words [word-break:break-word] overflow-hidden">
           {{{ linkify(tweet.content) }}}
         </p>
       @end

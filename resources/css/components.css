@@ -57,6 +57,11 @@
   @apply lg:hover:bg-neutral-light lg:hover:border-neutral-light;
 }
 
+/* Bouton retour */
+.back-btn {
+  @apply py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-white inline-flex items-center transition;
+}
+
 /* Style des liens primaires */
 .primary-link {
   @apply text-brand-primary transition-all duration-200 ease-in-out;
@@ -81,11 +86,12 @@
 }
 
 .nav-link {
-  @apply flex items-center gap-4 py-2 px-3  transition-all duration-100 ease-in-out;
+  @apply flex items-center gap-4 py-2 px-3 transition-all duration-100 ease-in-out;
 }
 
 .tweet-textarea {
   @apply w-full bg-transparent text-lg border-none focus:ring-0 resize-none placeholder:text-neutral-gray;
+  @apply overflow-hidden min-h-[56px] h-auto;
 }
 
 .close-media {

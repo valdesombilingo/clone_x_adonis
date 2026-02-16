@@ -21,7 +21,12 @@
         </div>
 
         {{-- Ce bouton déclenche le formulaire grâce à l'attribut form --}}
-        <button type="submit" form="tweet-form" class="primary-btn w-28 sm:w-36 px-0">
+        <button
+          type="submit"
+          form="tweet-form"
+          disabled
+          class="js-btn-poster w-28 sm:w-36 px-0 py-2 bg-brand-primary text-background-light text-center font-semibold rounded-full enabled:lg:hover:bg-brand-hoverPrimary disabled:opacity-50 disabled:cursor-default"
+        >
           Poster
         </button>
       </div>
@@ -29,9 +34,14 @@
       {{-- 2. ZONE DE RÉDACTION --}}
       <div class="p-4 flex gap-4">
         {{-- Avatar --}}
-        <div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+        <a
+          href="{{ route('show_profile', { username: auth.user.userName }) }}"
+          up-follow
+          up-target="#main-content"
+          class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0"
+        >
           <img src="{{ auth.user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
-        </div>
+        </a>
 
         <div class="flex-1">
           <form
@@ -42,13 +52,15 @@
             up-submit
             up-target="#main-content"
             novalidate
+            class="js-form-tweet"
           >
             {{ csrfField() }}
             {{-- Textarea --}}
             <textarea
               name="content"
               placeholder="Quoi de neuf, {{ auth.user.fullName.split(' ')[0] }} ?"
-              class="tweet-textarea min-h-[50px]"
+              class="tweet-textarea min-h-[50px] js-input-content"
+              maxlength="280"
               rows="2"
               autofocus
             >{{ old('content') || '' }}</textarea>
@@ -84,7 +96,7 @@
                 {{-- Icône pour ajouter un média (image/vidéo) --}}
                 <label>
                   <i class="fa-regular fa-image post-icon"></i>
-                  <input type="file" name="mediaUrl" class="hidden" accept="image/*,video/*" />
+                  <input type="file" name="mediaUrl" class="hidden js-input-file" accept="image/*,video/*" />
                 </label>
 
                 {{-- Icône pour ajouter un emoji --}}

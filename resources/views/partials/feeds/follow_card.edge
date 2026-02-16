@@ -36,7 +36,9 @@
 
       {{-- BIO --}}
       @if(item.bio)
-        <p class="text-white text-[15px] mt-1 line-clamp-2 leading-normal">
+        <p
+          class="text-white text-[15px] mt-1 line-clamp-2 break-words [word-break:break-word] overflow-hidden"
+        >
           {{{ linkify(item.bio) }}}
         </p>
       @endif

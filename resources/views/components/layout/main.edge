@@ -42,23 +42,27 @@
           @endcomponent
           
           {{-- Notifications --}}
-          @component('components/nav_links', {
-          href: route('notifications'),
-          route_name: 'notifications',
-          icon: 'bell',
-          label: 'Notifications'
-          })
-          @endcomponent
-          
+          <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
+            <div class="nav-link text-neutral-dark">
+
+              <hero-icon-outline name="bell" class="w-8 h-8  sm:w-7 sm:h-7">
+              </hero-icon-outline>
+
+              <span class="hidden lg:inline text-xl">Notifications</span>
+            </div>
+          </div>
+
           {{-- Messages --}}
-          @component('components/nav_links', {
-          
-          route_name: 'messages',
-          icon: 'mail',
-          label: 'Messages'
-          })
-          @endcomponent
-          
+          <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
+            <div class="nav-link text-neutral-dark">
+
+              <hero-icon-outline name="mail" class="w-8 h-8  sm:w-7 sm:h-7">
+              </hero-icon-outline>
+
+              <span class="hidden lg:inline text-xl">Messages</span>
+            </div>
+          </div>
+
           {{-- Profil --}}
           @component('components/nav_links', {
           href: route('show_profile', { username: auth.user.userName }),
@@ -83,11 +87,15 @@
 
       {{-- Profil & Déconnexion --}}
       <div class="mb-4">
-        <form action="{{ route('logout') }}" method="POST">
+        <form
+          action="{{ route('logout') }}"
+          method="POST"
+          onsubmit="return confirm('Se déconnecter de Clone X ?')"
+        >
           {{ csrfField() }}
           <button
             type="submit"
-            class="flex items-center gap-3 p-3 rounded-full hover:bg-neutral-dark w-full transition text-left"
+            class="flex items-center gap-3 p-3 lg:rounded-full lg:hover:bg-neutral-dark w-full transition text-left"
           >
             <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
               <img src="{{ user.avatar }}" alt="Avatar" class="w-full h-full object-cover" />
@@ -145,7 +153,9 @@
         </div>
       </div>
       <a
-        href="{{ route('search') }}"
+        href="{{ route('search', {}, { qs: { q: query, tab: 'hashtags' } }) }}"
+        up-follow
+        up-target="#main-content"
         class="text-sm text-brand-primary hover:underline mt-4 inline-block"
       >Voir plus</a>
     </div>
@@ -203,7 +213,9 @@
         </div>
       </div>
       <a
-        href="{{ route('search') }}"
+        href="{{ route('search', {}, { qs: { q: query, tab: 'accounts' } }) }}"
+        up-follow
+        up-target="#main-content"
         class="text-sm text-brand-primary hover:underline mt-4 inline-block"
       >Voir plus</a>
     </div>
@@ -253,23 +265,27 @@
     @endcomponent
           
     {{-- Notifications --}}
-    @component('components/nav_links', {
-          href: route('notifications'),
-          route_name: 'notifications',
-          icon: 'bell',
-          label: 'Notifications'
-    })
-    @endcomponent
-          
+    <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
+      <div class="nav-link text-neutral-dark">
+
+        <hero-icon-outline name="bell" class="w-8 h-8  sm:w-7 sm:h-7">
+        </hero-icon-outline>
+
+        <span class="hidden lg:inline text-xl">Notifications</span>
+      </div>
+    </div>
+
     {{-- Messages --}}
-    @component('components/nav_links', {
-          
-          route_name: 'messages',
-          icon: 'mail',
-          label: 'Messages'
-    })
-    @endcomponent
-          
+    <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
+      <div class="nav-link text-neutral-dark">
+
+        <hero-icon-outline name="mail" class="w-8 h-8  sm:w-7 sm:h-7">
+        </hero-icon-outline>
+
+        <span class="hidden lg:inline text-xl">Messages</span>
+      </div>
+    </div>
+
     {{-- Profil --}}
     @component('components/nav_links', {
           href: route('show_profile', { username: auth.user.userName }),

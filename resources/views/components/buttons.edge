@@ -1,5 +1,16 @@
-{{-- Bouton social (Google, Apple, etc.) --}}
-@if(type === 'social')
+{{-- Bouton retour --}}
+@if(type === 'back')
+  <button
+    type="button"
+    data-back="{{ fallback || route('home') }}"
+    class="{{ class_name || '' }}"
+    aria-label="Retour"
+  >
+    <i class="fa-solid fa-arrow-left text-lg"></i>
+  </button>
+
+  {{-- Bouton social (Google, Apple, etc.) --}}
+@elseif(type === 'social')
   <button type="{{ type_name || 'submit' }}" class="btn-social-auth">
     <img src="{{ img }}" class="icon-social-auth" />
     <span>{{ label }}</span>

@@ -60,11 +60,4 @@ export default class HomeController {
       user,
     })
   }
-
-  /**
-   * Notifications
-   */
-  async notifications({ view, auth }: HttpContext) {
-    return view.render('pages/notifications', { user: auth.user })
-  }
 }

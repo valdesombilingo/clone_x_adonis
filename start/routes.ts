@@ -102,11 +102,8 @@ router
       // 2. Route pour les recherches d'utilisateurs et hashtags
       router.get('/search', [SearchController, 'search']).as('search')
 
-      // 3. Route pour les notifications
-      router.get('/notifications', [HomeController, 'notifications']).as('notifications')
-
       // =========================================================================
-      //  4. ROUTES PROFILS
+      //  3. ROUTES PROFILS
       // =========================================================================
       // Route pour l'affichage du profil utilisateur
       router.get('/:username', [ProfilesController, 'showProfile']).as('show_profile')
@@ -123,7 +120,7 @@ router
     })
 
     // =========================================================================
-    //  5. ROUTES TWEETS
+    //  4. ROUTES TWEETS
     // =========================================================================
 
     router.group(() => {

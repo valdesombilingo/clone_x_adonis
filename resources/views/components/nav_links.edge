@@ -1,11 +1,8 @@
-{{-- NOTE: Ce composant permet d'afficher les icones de navigation et de simuler le fonctionnement Single page --}}
+@let(isHome = icon === 'home' && request.matchesRoute('home'))
 
-{{-- 1. Lien actuel correspond à la page affichée --}}
-@let(isHome = icon === 'home' && (request.matchesRoute('home') || request.matchesRoute('show_tweet')))
 @let(isProfile = icon === 'user' && request.matchesRoute('show_profile') && request.param('username') === auth.user.userName)
 
-{{-- 2. Logique générique pour (Notifications, etc.) --}}
-@let(isGenericActive = href !== route('home') && request.url().startsWith(href))
+@let(isGenericActive = icon !== 'home' && icon !== 'user' && href !== route('home') && request.url().startsWith(href))
 
 @let(isActive = isHome || isProfile || isGenericActive)
 

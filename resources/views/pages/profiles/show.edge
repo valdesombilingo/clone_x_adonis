@@ -5,16 +5,12 @@
 
       {{-- ================= EN-TETE STICKY ==================== --}}
       <div class="sticky top-0 bg-background-dark/80 backdrop-blur-sm z-30 px-4 py-1 flex items-center">
-        <a
-          href="{{ route('home') }}"
-          up-follow
-          up-target="#main-content"
-          up-history="true"
-          class="py-2.5 px-[0.7rem] lg:hover:bg-neutral-dark/40 rounded-full mr-4 sm:mr-6 text-background-light inline-flex items-center transition"
-        >
-          <i class="fa-solid fa-arrow-left text-lg"></i>
-        </a>
-
+        @component('components/buttons', {
+            type: 'back',
+            class_name: 'back-btn'
+        })
+        @endcomponent
+        
         <div>
           <h1 class="font-bold text-xl truncate">
             {{ user.fullName }}
@@ -54,6 +50,23 @@
                 >
                   Éditer le profil
                   </a>
+
+                {{-- Bouton Déconnexion Mobile --}}
+                <form
+                  action="{{ route('logout') }}"
+                  method="POST"
+                  onsubmit="return confirm('Se déconnecter de Clone X ?')"
+                  class="sm:hidden"
+                >
+                  {{ csrfField() }}
+                  <button
+                    type="submit"
+                    class="w-[2.7rem] h-[2.7rem] flex items-center justify-center rounded-full border border-white text-black bg-white"
+                  >
+                    <i class="fa-solid fa-power-off"></i>
+                  </button>
+                </form>
+
               @else
                 
                 {{-- Bouton Suivre (Visible uniquement si pas de blocage) --}}
@@ -93,7 +106,7 @@
                     up-target="#main-content"
                   >
                     {{ csrfField() }}
-    <button
+                    <button
                       type="submit"
                       title="{{ iBlockedHim ? 'Débloquer' : 'Bloquer' }}"
                       class="w-[2.7rem] h-[2.7rem] flex items-center justify-center rounded-full border transition-all {{ iBlockedHim ? 'bg-red-500/15 border-red-500 text-red-500' : 'border-brand-secondary text-white lg:hover:bg-neutral-dark/50' }}"
@@ -147,7 +160,9 @@
           @else
             {{-- BIO ET INFOS --}}
             @if(user.bio)
-              <p class="mb-4 text-background-light text-[0.938rem] px-4">
+              <p
+                class="mb-4 text-background-light text-[0.938rem] px-4 break-words [word-break:break-word] overflow-hidden"
+              >
                 {{{ linkify(user.bio) }}}
               </p>
             @endif
