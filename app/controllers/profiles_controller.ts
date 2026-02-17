@@ -156,6 +156,15 @@ export default class ProfilesController {
 
         // Cas 2 : Le champ "mot de passe actuel" est rempli
         if (currentPassword) {
+          // Si l'utilisateur n'a pas de mot de passe (compte OAuth)
+          if (!user.password) {
+            session.flash(
+              'error',
+              'Vous vous êtes inscrit avec Google ou GitHub. Créez un mot de passe via "Mot de passe oublié.'
+            )
+            return response.redirect().back()
+          }
+
           const isPasswordValid = await hash.verify(user.password, currentPassword)
 
           if (!isPasswordValid) {

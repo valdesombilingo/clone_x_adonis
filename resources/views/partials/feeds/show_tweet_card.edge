@@ -58,15 +58,15 @@
     </div>
 
     {{-- Média Adaptatif : Taille réduite sur Desktop/Tablette --}}
-    @if(tweet.mediaUrl)
+    @if(tweet.media)
       <div
         class="relative w-fit max-w-full mx-auto overflow-hidden rounded-2xl border border-neutral-800 bg-black mb-4"
       >
-        @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
-          <video src="{{ tweet.mediaUrl }}" up-keep controls class="max-h-[500px] w-[500px] block bg-black">
+        @if(tweet.media.match(/\.(mp4|webm|mov)$/i))
+          <video src="{{ tweet.media }}" up-keep controls class="max-h-[500px] w-[500px] block bg-black">
           </video>
         @else
-          <img src="{{ tweet.mediaUrl }}" class="max-h-[500px] w-auto block object-contain" />
+          <img src="{{ tweet.media }}" class="max-h-[500px] w-auto block object-contain" />
         @endif
       </div>
     @endif

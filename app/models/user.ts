@@ -45,13 +45,13 @@ export default class User extends compose(BaseModel, AuthFinder) {
       return '/images/backgrounds/default-profile-avatar.png'
     }
 
-    // Si c'est une URL complète (Google/GitHub), on la retourne telle quelle
     if (this.avatarUrl.startsWith('http')) {
       return this.avatarUrl
     }
 
-    // Sinon, on ajoute le préfixe pour nos images locales
-    return `/uploads/${this.avatarUrl}`
+    const cleanPath = this.avatarUrl.replace(/^\/?uploads\//, '')
+
+    return `/uploads/${cleanPath}`
   }
 
   @column()
@@ -66,7 +66,9 @@ export default class User extends compose(BaseModel, AuthFinder) {
       return this.bannerImage
     }
 
-    return `/uploads/${this.bannerImage}`
+    const cleanPath = this.bannerImage.replace(/^\/?uploads\//, '')
+
+    return `/uploads/${cleanPath}`
   }
 
   @column()

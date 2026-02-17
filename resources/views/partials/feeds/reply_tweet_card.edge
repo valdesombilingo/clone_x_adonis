@@ -83,11 +83,11 @@
       </p>
 
       {{-- Média de la réponse --}}
-      @if(reply.mediaUrl)
+      @if(reply.media)
         <div class="mt-3 rounded-2xl border border-neutral-800 overflow-hidden bg-black max-w-fit">
-          @if(reply.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+          @if(reply.media.match(/\.(mp4|webm|mov)$/i))
             <video
-              src="{{ reply.mediaUrl }}"
+              src="{{ reply.media }}"
               controls
               up-keep
               preload="metadata"
@@ -97,7 +97,7 @@
             </video>
           @else
             <img
-              src="{{ reply.mediaUrl }}"
+              src="{{ reply.media }}"
               alt="Post media"
               class="max-h-[350px] w-auto max-w-full object-cover"
               loading="lazy"

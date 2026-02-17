@@ -29,6 +29,20 @@ export default class Tweet extends BaseModel {
   @column()
   declare mediaUrl: string | null
 
+  // app/models/tweet.ts ou user.ts
+
+  get media() {
+    if (!this.mediaUrl) return null
+
+    if (this.mediaUrl.startsWith('http')) {
+      return this.mediaUrl
+    }
+
+    const fileName = this.mediaUrl.replace(/^(\/?public)?\/?uploads\//, '')
+
+    return `/uploads/${fileName}`
+  }
+
   @column()
   declare parentId: number | null
 

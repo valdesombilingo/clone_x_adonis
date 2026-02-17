@@ -79,16 +79,16 @@
       @end
                   
       {{-- Média du tweet (image ou vidéo) --}}
-      @if(tweet.mediaUrl)
+      @if(tweet.media)
         <div class="mt-3 max-w-fit">
           <div
             class="relative overflow-hidden rounded-2xl border border-neutral-dark bg-black flex items-center justify-center"
           >
 
             {{-- Affichage vidéo si le média est une vidéo --}}
-            @if(tweet.mediaUrl.match(/\.(mp4|webm|mov)$/i))
+            @if(tweet.media.match(/\.(mp4|webm|mov)$/i))
               <video
-                src="{{ tweet.mediaUrl }}"
+                src="{{ tweet.media }}"
                 controls
                 preload="metadata"
                 up-keep
@@ -100,7 +100,7 @@
               {{-- Affichage image sinon --}}
             @else
               <img
-                src="{{ tweet.mediaUrl }}"
+                src="{{ tweet.media }}"
                 alt="Post media"
                 class="max-h-[350px] w-auto max-w-full object-cover"
                 loading="lazy"
