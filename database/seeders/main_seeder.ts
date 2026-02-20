@@ -3,16 +3,25 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import User from '#models/user'
 import Tweet from '#models/tweet'
 import Hashtag from '#models/hashtag'
+import Follow from '#models/follow'
+import Like from '#models/like'
+import Block from '#models/block'
 
 export default class extends BaseSeeder {
   async run() {
-    // 1. CRÉATION DES PROFILS
+    // 1. CRÉATION DES HASHTAGS
+    const tagRdc = await Hashtag.firstOrCreate({ name: 'rdc' })
+    const tagTech = await Hashtag.firstOrCreate({ name: 'tech' })
+    const tagKadea = await Hashtag.firstOrCreate({ name: 'KadeaAcademy' })
+    const tagIa = await Hashtag.firstOrCreate({ name: 'ia' })
+
+    // 2. CRÉATION DES PROFILS
     const kadea = await User.updateOrCreate(
       { email: 'kadea@gmail.com' },
       {
         fullName: 'Kadea Academy',
         userName: 'kadeaacademy',
-        password: 'Kadea_2026!',
+        password: 'Admin_2026!',
         avatarUrl: 'kadea_profile.jpg',
         bannerImage: 'kadea_banner.jpg',
         bio: `Académie de développeurs web & mobile et spécialistes en marketing digital\n\nUne formation qui change une vie`,
@@ -27,7 +36,7 @@ export default class extends BaseSeeder {
       {
         fullName: 'Vodacom RDC',
         userName: 'vodacomrdc',
-        password: 'Vodacom_2026!',
+        password: 'Admin_2026!',
         avatarUrl: 'vodacom_profile.jpg',
         bannerImage: 'vodacom_banner.jpg',
         bio: 'Vodacom offre les services téléphoniques et internet à plus de 21.000.000 abonnés. Notre ambition est de démocratiser l’internet et le rendre accessible à tous.',
@@ -42,7 +51,7 @@ export default class extends BaseSeeder {
       {
         fullName: 'Valdes Ombilingo',
         userName: 'valdesombilingo',
-        password: 'Valdes_2026!',
+        password: 'Admin_2026!',
         avatarUrl: 'valdesombilingo_profile.jpg',
         bannerImage: 'valdesombilingo_banner.jpg',
         bio: 'Fullstack Developer | Passionné du Digital. 🚀\n#rdc #tech',
@@ -62,27 +71,57 @@ export default class extends BaseSeeder {
       }
     )
 
-    // 2. RÉSEAU (FOLLOWS)
-    await valdes.related('following').create({ followingId: kadea.id })
-    await valdes.related('following').create({ followingId: vodacom.id })
-    await valdes.related('following').create({ followingId: admin.id })
-    await kadea.related('following').create({ followingId: valdes.id })
+    const darkElon = await User.updateOrCreate(
+      { email: 'darkelon@gmail.com' },
+      {
+        fullName: 'Dark Elon',
+        userName: 'darkelon',
+        password: 'Admin_2026!',
+        avatarUrl: 'dark_elon_profile.jpg',
+        bannerImage: 'dark_elon_banner.jpg',
+        bio: 'Messager du futur, êtes-vous prêt ! 🤖 #ia',
+        location: 'Sur mars',
+        websiteUrl: 'https://x.com',
+        isPrivate: true,
+        isEmailVerified: true,
+      }
+    )
 
-    // 3. HASHTAGS
-    const tagRdc = await Hashtag.firstOrCreate({ name: 'rdc' })
-    const tagTech = await Hashtag.firstOrCreate({ name: 'tech' })
-    const tagKadea = await Hashtag.firstOrCreate({ name: 'KadeaAcademy' })
+    // 3. RÉSEAU ET BLOCAGE
+    await Follow.updateOrCreate(
+      { followerId: valdes.id, followingId: darkElon.id },
+      { isAccepted: true }
+    )
+
+    await Block.updateOrCreate({ blockerId: darkElon.id, blockedId: admin.id }, {})
+
+    await Follow.updateOrCreate(
+      { followerId: valdes.id, followingId: kadea.id },
+      { isAccepted: true }
+    )
+    await Follow.updateOrCreate(
+      { followerId: valdes.id, followingId: vodacom.id },
+      { isAccepted: true }
+    )
+    await Follow.updateOrCreate(
+      { followerId: valdes.id, followingId: admin.id },
+      { isAccepted: true }
+    )
+    await Follow.updateOrCreate(
+      { followerId: kadea.id, followingId: valdes.id },
+      { isAccepted: true }
+    )
 
     // 4. TWEETS & RÉPONSES
 
-    // --- TWEET KADEA 1 : VISION ---
+    // --- TWEET KADEA 1 ---
     const tweetKadeaVision = await Tweet.create({
       userId: kadea.id,
       content: `Chez Kadea Academy, notre vision est claire : propulser la jeunesse congolaise vers l'excellence numérique.\n\nNous formons les leaders tech de demain pour bâtir une économie digitale forte en RDC. Rejoignez le mouvement ! 🚀 #rdc #tech #kadeaacademy`,
     })
     await tweetKadeaVision.related('hashtags').attach([tagRdc.id, tagTech.id, tagKadea.id])
 
-    // --- TWEET KADEA 2 : NOUVEAUTÉS 2025 (AVEC IMAGE) ---
+    // --- TWEET KADEA 2 ---
     const tweetKadeaNews = await Tweet.create({
       userId: kadea.id,
       content: `NOUVEAUTÉS 2025 : Kadea Academy enrichit son offre de formations ! 🎓\n\n✅ 95% de nos apprenants trouvent un emploi.\n✅ Financements disponibles pour tous les budgets.\n\nInscris-toi maintenant : https://bit.ly/_kadeaacademy #tech #RDC`,
@@ -90,15 +129,15 @@ export default class extends BaseSeeder {
     })
     await tweetKadeaNews.related('hashtags').attach([tagTech.id, tagRdc.id])
 
-    // Tweet de Valdes avec MÉDIA
+    // --- TWEET VALDES ---
     const tweetValdes = await Tweet.create({
       userId: valdes.id,
-      content: 'Cohorte 2025 Dévéloppement Web ! Merci @Kadeaacademy pour la formation. #rdc #tech',
+      content: 'Cohorte 2025 Dévéloppement Web ! Merci @kadeaacademy pour la formation. #rdc #tech',
       mediaUrl: 'valdesombilingo_cohorte.jpg',
     })
     await tweetValdes.related('hashtags').attach([tagRdc.id, tagTech.id])
 
-    // Tweet de Vodacom avec MÉDIA
+    // --- TWEET VODACOM ---
     const tweetVodacom = await Tweet.create({
       userId: vodacom.id,
       content: `1 Go à seulement 1 $ ! 🤩\nRestez connectés pour découvrir nos prochaines offres internet. #rdc 🌐`,
@@ -106,19 +145,12 @@ export default class extends BaseSeeder {
     })
 
     // 5. LIKES & INTERACTIONS
-    // Valdes et Admin likent les nouveautés de Kadea
-    await tweetKadeaNews.related('likes').create({ userId: valdes.id })
-    await tweetKadeaNews.related('likes').create({ userId: admin.id })
-
-    // Vodacom like la vision de Kadea
-    await tweetKadeaVision.related('likes').create({ userId: vodacom.id })
-
-    // Kadea et Vodacom likent le tweet de Valdes
-    await tweetValdes.related('likes').create({ userId: kadea.id })
-    await tweetValdes.related('likes').create({ userId: vodacom.id })
-
-    // Valdes like le tweet de Vodacom
-    await tweetVodacom.related('likes').create({ userId: valdes.id })
+    await Like.firstOrCreate({ userId: valdes.id, tweetId: tweetKadeaNews.id })
+    await Like.firstOrCreate({ userId: admin.id, tweetId: tweetKadeaNews.id })
+    await Like.firstOrCreate({ userId: vodacom.id, tweetId: tweetKadeaVision.id })
+    await Like.firstOrCreate({ userId: kadea.id, tweetId: tweetValdes.id })
+    await Like.firstOrCreate({ userId: vodacom.id, tweetId: tweetValdes.id })
+    await Like.firstOrCreate({ userId: valdes.id, tweetId: tweetVodacom.id })
 
     // 6. THREAD (Réponses)
     const replyKadea = await Tweet.create({
@@ -133,11 +165,24 @@ export default class extends BaseSeeder {
       content: 'Merci ! Hâte de passer à la prochaine étape. 🔜',
     })
 
-    // Réponse de Valdes au tweet des nouveautés Kadea
     await Tweet.create({
       userId: valdes.id,
       parentId: tweetKadeaNews.id,
       content: 'Je recommande vivement ! Cette formation a changé ma vie. 🔥',
+    })
+
+    // 7. TWEET DARK ELON
+    const tweetElon = await Tweet.create({
+      userId: darkElon.id,
+      content: "L'ia va bientot nous remplacer. 🤖 #ia",
+      mediaUrl: 'dark_elon_ia.mp4',
+    })
+    await tweetElon.related('hashtags').attach([tagIa.id, tagTech.id])
+
+    await Tweet.create({
+      userId: valdes.id,
+      parentId: tweetElon.id,
+      content: 'Les devs, eux, remplacent les bugs que l’IA crée 😌',
     })
   }
 }

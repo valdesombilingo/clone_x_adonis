@@ -11,28 +11,36 @@
     href="{{ href || '#' }}"
     up-follow
     up-target="#main-content"
-    class="nav-link {{ isActive ? 'text-white font-semibold' : 'text-neutral-light' }}"
+    up-cache="false"
+    class="nav-link flex items-center {{ isActive ? 'text-white font-semibold' : 'text-neutral-light' }}"
   >
-
-    @if(icon === 'home')
-      {{-- LOGIQUE SPÉCIFIQUE POUR LA PAGE HOME --}}
-      @if(isActive)
-        <hero-icon-solid name="home" class="w-8 h-8  sm:w-7 sm:h-7">
-        </hero-icon-solid>
-      @else
-        <hero-icon-outline name="home" class="w-8 h-8  sm:w-7 sm:h-7">
+    <div class="relative flex items-center justify-center">
+      @if(icon === 'home')
+        @if(isActive)
+          <hero-icon-solid name="home" class="w-8 h-8 sm:w-7 sm:h-7">
+          </hero-icon-solid>
+        @else
+          <hero-icon-outline name="home" class="w-8 h-8 sm:w-7 sm:h-7">
+          </hero-icon-outline>
+        @end
+        
+      @elseif(icon)
+        <hero-icon-outline
+          name="{{ icon }}"
+          class="w-8 h-8 sm:w-7 sm:h-7 {{ isActive ? 'fill-current stroke-2' : 'fill-none stroke-2' }}"
+        >
         </hero-icon-outline>
+
+        {{-- Logique du point bleu sur l'icône bell --}}
+        @if(icon === 'bell' && await hasUnreadNotifications(auth.user?.id))
+          <span
+            up-hungry
+            class="absolute top-0 right-0 w-3 h-3 bg-brand-primary rounded-full border-2 border-background-dark"
+          ></span>
+        @end
       @end
-      
-    @elseif(icon)
-      {{-- LOGIQUE GÉNÉRALE --}}
-      <hero-icon-outline
-        name="{{ icon }}"
-        class="w-8 h-8  sm:w-7 sm:h-7 {{ isActive ? 'fill-current stroke-2' : 'fill-none stroke-2' }}"
-      >
-      </hero-icon-outline>
-    @end
-    
-    <span class="hidden lg:inline text-xl">{{ label }}</span>
+    </div>
+
+    <span class="hidden lg:inline text-xl ml-4">{{ label }}</span>
   </a>
 </div>

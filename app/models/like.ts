@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo, afterCreate, afterDelete } from '@adonisj
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import User from '#models/user'
 import Tweet from '#models/tweet'
+import Notification from '#models/notification'
 
 export default class Like extends BaseModel {
   @column({ isPrimary: true })
@@ -38,19 +39,31 @@ export default class Like extends BaseModel {
 
   @afterCreate()
   static async incrementLikes(like: Like) {
+    await Tweet.query().where('id', like.tweetId).increment('likes_count', 1)
+
     const tweet = await Tweet.find(like.tweetId)
-    if (tweet) {
-      tweet.likesCount++
-      await tweet.save()
+
+    if (tweet && tweet.userId !== like.userId) {
+      await Notification.create({
+        userId: tweet.userId,
+        notifierId: like.userId,
+        tweetId: tweet.id,
+        type: 'LIKE',
+      })
     }
   }
 
   @afterDelete()
   static async decrementLikes(like: Like) {
-    const tweet = await Tweet.find(like.tweetId)
-    if (tweet && tweet.likesCount > 0) {
-      tweet.likesCount--
-      await tweet.save()
-    }
+    await Tweet.query()
+      .where('id', like.tweetId)
+      .where('likes_count', '>', 0)
+      .decrement('likes_count', 1)
+
+    await Notification.query()
+      .where('notifierId', like.userId)
+      .where('tweetId', like.tweetId)
+      .where('type', 'LIKE')
+      .delete()
   }
 }

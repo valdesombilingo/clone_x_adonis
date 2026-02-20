@@ -48,33 +48,24 @@ export default class Follow extends BaseModel {
 
   @afterCreate()
   static async incrementCounters(follow: Follow) {
-    const follower = await User.find(follow.followerId)
-    const following = await User.find(follow.followingId)
-
-    if (follower) {
-      follower.followingCount = (follower.followingCount ?? 0) + 1
-      await follower.save()
-    }
-
-    if (following) {
-      following.followersCount = (following.followersCount ?? 0) + 1
-      await following.save()
+    if (follow.isAccepted) {
+      await User.query().where('id', follow.followerId).increment('following_count', 1)
+      await User.query().where('id', follow.followingId).increment('followers_count', 1)
     }
   }
 
   @afterDelete()
   static async decrementCounters(follow: Follow) {
-    const follower = await User.find(follow.followerId)
-    const following = await User.find(follow.followingId)
+    if (follow.isAccepted) {
+      await User.query()
+        .where('id', follow.followerId)
+        .where('following_count', '>', 0)
+        .decrement('following_count', 1)
 
-    if (follower && follower.followingCount > 0) {
-      follower.followingCount--
-      await follower.save()
-    }
-
-    if (following && following.followersCount > 0) {
-      following.followersCount--
-      await following.save()
+      await User.query()
+        .where('id', follow.followingId)
+        .where('followers_count', '>', 0)
+        .decrement('followers_count', 1)
     }
   }
 }

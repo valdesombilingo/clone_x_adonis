@@ -1,11 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Like from '#models/like'
+import Tweet from '#models/tweet'
+import db from '@adonisjs/lucid/services/db'
 
 // NOTE : Gestion de l'interaction "Liker/Unliker" via une logique de bascule (Toggle).
-// Grâce aux Hooks Lucid du modèle Like ce controller :
-// - Vérifie si un Like existe déjà pour le couple (User, Tweet).
-// - Si présent : Supprime le Like (déclenche le hook afterDelete du modèle).
-// - Si absent : Crée le Like (déclenche le hook afterCreate du modèle).
+// Grâce aux Hooks Lucid du modèle Like ce controller
 export default class LikesController {
   // =========================================================================
   //  Méthode Toggle (Liker / Unliker) 'toggleLike'
@@ -14,24 +13,32 @@ export default class LikesController {
     const user = auth.getUserOrFail()
     const tweetId = Number(params.id)
 
-    // Vérification si le like existe déjà
+    const tweet = await Tweet.query().where('id', tweetId).preload('user').firstOrFail()
+
+    const isAuthor = tweet.userId === user.id
+    const isPublic = !tweet.user.isPrivate
+    const isFollowerAccepted = await db
+      .from('follows')
+      .where('follower_id', user.id)
+      .where('following_id', tweet.userId)
+      .where('is_accepted', true)
+      .first()
+
+    if (!isPublic && !isAuthor && !isFollowerAccepted) {
+      return response.forbidden("Vous n'avez pas l'autorisation de liker ce contenu.")
+    }
+
     const existingLike = await Like.query()
       .where('userId', user.id)
       .where('tweetId', tweetId)
       .first()
 
     if (existingLike) {
-      // hook afterDelete décrémente likesCount
       await existingLike.delete()
     } else {
-      // hook afterCreate incrémente likesCount
       await Like.create({ userId: user.id, tweetId })
     }
 
-    // On récupère l'onglet depuis le referer pour le flasher en session
-    const queryParams = request.qs()
-
-    // On redirige vers la page d'où on vient
-    return response.redirect().withQs(queryParams).back()
+    return response.redirect().withQs(request.qs()).back()
   }
 }

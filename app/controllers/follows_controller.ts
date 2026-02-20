@@ -1,12 +1,15 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Follow from '#models/follow'
 import User from '#models/user'
+import Notification from '#models/notification'
+import db from '@adonisjs/lucid/services/db'
 
 export default class FollowsController {
   /**
    * Contrôleur de follow :
    * - Affichage liste des abonnés ou abonnements (showFollow)
    * - Méthode Toggle (Suivre / Se désabonner) (toggleFollow)
+   * - Accepter ou Annulé une demande d'abonnement 'acceptFollow' et 'rejectFollow'
    */
   // =========================================================================
   //  Affiche la liste des abonnés ou abonnements 'showFollow'
@@ -23,10 +26,21 @@ export default class FollowsController {
 
     // 3. Construire la requête pour récupérer les utilisateurs de la liste
     const query = User.query()
-      // Est-ce que le user (connecté) les suis ? Pour le bouton "Abonné"
       .preload('followers', (q) => q.where('followerId', authUser.id))
-      // Est-ce qu'ILS ME suivent ? (Pour le texte "Suivre en retour")
       .preload('following', (q) => q.where('followingId', authUser.id))
+      .select('*')
+      .select(
+        db.raw(
+          '(SELECT EXISTS (SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = users.id)) as i_blocked_him',
+          [authUser.id]
+        )
+      )
+      .select(
+        db.raw(
+          '(SELECT EXISTS (SELECT 1 FROM blocks WHERE blocker_id = users.id AND blocked_id = ?)) as he_blocked_me',
+          [authUser.id]
+        )
+      )
 
     if (tab === 'following') {
       // Les gens que targetUser suit
@@ -36,7 +50,11 @@ export default class FollowsController {
     } else {
       // Les gens qui suivent targetUser
       query.whereIn('id', (sub) => {
-        sub.from('follows').select('follower_id').where('following_id', targetUser.id)
+        sub
+          .from('follows')
+          .select('follower_id')
+          .where('following_id', targetUser.id)
+          .where('is_accepted', true)
       })
     }
 
@@ -44,8 +62,14 @@ export default class FollowsController {
 
     // 4. Injecter les états dans $extras pour Edge
     users.forEach((u) => {
-      u.$extras.isFollowing = u.followers.length > 0
+      const followEntry = u.followers.length > 0 ? u.followers[0] : null
+
+      u.$extras.isFollowing = !!followEntry
+      u.$extras.isFollowAccepted = followEntry ? followEntry.isAccepted : false
       u.$extras.followsYou = u.following.length > 0
+
+      u.$extras.iBlockedHim = Boolean(u.$extras.i_blocked_him)
+      u.$extras.heBlockedMe = Boolean(u.$extras.he_blocked_me)
     })
 
     return view.render('pages/profiles/follow', {
@@ -61,31 +85,86 @@ export default class FollowsController {
 
   async toggleFollow({ auth, params, response, request }: HttpContext) {
     const follower = auth.getUserOrFail()
-    const followingId = params.id
-
-    // Sécurité : pas d'auto-follow
-    if (follower.id === Number(followingId)) {
-      return response.badRequest('Vous ne pouvez pas vous suivre vous-même.')
-    }
+    const targetUser = await User.findOrFail(params.id)
 
     const existingFollow = await Follow.query()
       .where('followerId', follower.id)
-      .where('followingId', followingId)
+      .where('followingId', targetUser.id)
       .first()
 
     if (existingFollow) {
+      // ANNULATION PAR L'EXPÉDITEUR
       await existingFollow.delete()
+      // Supprime la notification chez le destinataire
+      await Notification.query()
+        .where('notifierId', follower.id)
+        .where('userId', targetUser.id)
+        .whereIn('type', ['FOLLOW', 'FOLLOW_REQUEST'])
+        .delete()
     } else {
-      await Follow.create({
-        followerId: follower.id,
-        followingId: followingId,
-        isAccepted: true,
+      // ENVOI DE LA DEMANDE
+      const isAccepted = !targetUser.isPrivate
+      await Follow.create({ followerId: follower.id, followingId: targetUser.id, isAccepted })
+
+      await Notification.create({
+        userId: targetUser.id,
+        notifierId: follower.id,
+        type: isAccepted ? 'FOLLOW' : 'FOLLOW_REQUEST',
       })
     }
+    return response.redirect().withQs(request.qs()).back()
+  }
 
-    const queryParams = request.qs()
+  // ===================================================================================
+  //  Méthode Accepter ou Annulé une demande d'abonnement 'acceptFollow'et 'rejectFollow'
+  // ===================================================================================
 
-    // On redirige en réinjectant ces paramètres
-    return response.redirect().withQs(queryParams).back()
+  // Accepter la demande
+  async acceptFollow({ auth, params, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    const follow = await Follow.query()
+      .where('followerId', params.id)
+      .where('followingId', user.id)
+      .firstOrFail()
+
+    follow.isAccepted = true
+    await follow.save()
+
+    await User.query().where('id', follow.followerId).increment('following_count', 1)
+    await User.query().where('id', follow.followingId).increment('followers_count', 1)
+
+    // 1. Ssupprime la notification de demande chez le destinataire
+    await Notification.query()
+      .where('notifierId', params.id)
+      .where('userId', user.id)
+      .where('type', 'FOLLOW_REQUEST')
+      .delete()
+
+    // 2. Crée une notification pour l'expéditeur
+    await Notification.create({
+      userId: params.id,
+      notifierId: user.id,
+      type: 'FOLLOW_ACCEPTED',
+    })
+
+    return response.redirect().back()
+  }
+
+  // Refuser la demande
+  async rejectFollow({ auth, params, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    // Supprime le lien
+    await Follow.query().where('followerId', params.id).where('followingId', user.id).delete()
+
+    // Supprime la notification de demande chez nous (le destinataire)
+    await Notification.query()
+      .where('notifierId', params.id)
+      .where('userId', user.id)
+      .where('type', 'FOLLOW_REQUEST')
+      .delete()
+
+    return response.redirect().back()
   }
 }

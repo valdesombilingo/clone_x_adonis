@@ -4,6 +4,8 @@ import app from '@adonisjs/core/services/app'
 import { cuid } from '@adonisjs/core/helpers'
 import Tweet from '#models/tweet'
 import Hashtag from '#models/hashtag'
+import User from '#models/user'
+import Notification from '#models/notification'
 import { createTweetValidator } from '#validators/tweet'
 import fs from 'node:fs/promises'
 import db from '@adonisjs/lucid/services/db'
@@ -57,12 +59,25 @@ export default class TweetsController {
       retweetId: payload.retweetId,
     })
 
-    // 2. Extraction des hashtags avec Linkify
+    // 2. GESTION DES NOTIFICATIONS DE RÉPONSE
+    if (payload.parentId) {
+      const parentTweet = await Tweet.find(payload.parentId)
+      if (parentTweet && parentTweet.userId !== user.id) {
+        await Notification.create({
+          userId: parentTweet.userId,
+          notifierId: user.id,
+          tweetId: tweet.id,
+          type: 'REPLY',
+        })
+      }
+    }
+
+    // 3. Extraction des hashtags et mentions avec Linkify
     if (payload.content) {
       const matches = linkify.match(payload.content)
 
+      // --- GESTION DES HASHTAGS ---
       if (matches) {
-        // Filtrer uniquement les hashtags et nettoyer le nom
         const hashtagNames = matches
           .filter((m) => m.schema === '#')
           .map((m) => m.raw.slice(1).toLowerCase())
@@ -72,18 +87,41 @@ export default class TweetsController {
           const hashtagIds: number[] = []
 
           for (const name of uniqueNames) {
-            // firstOrCreate évite les doublons dans la table 'hashtags'
             const hashtag = await Hashtag.firstOrCreate({ name }, { name })
             hashtagIds.push(hashtag.id)
           }
-
-          // 3. Liaison automatique dans la table pivot 'tweet_hashtags'
           await tweet.related('hashtags').attach(hashtagIds)
+        }
+      }
+
+      // --- GESTION DES MENTIONS (@) ---
+      // Extrait tout ce qui commence par @ suivi de caractères alphanumériques
+      const mentionMatches = payload.content.match(/@\w+/g)
+
+      if (mentionMatches) {
+        // 2. Retire le '@' de chaque match et on passe en minuscule pour éviter les erreurs de casse
+        const namesToSearch = [
+          ...new Set(mentionMatches.map((m) => m.replace('@', '').toLowerCase())),
+        ]
+
+        for (const name of namesToSearch) {
+          // 3. Cherche l'utilisateur
+          const mentionedUser = await User.query().whereRaw('LOWER(user_name) = ?', [name]).first()
+
+          if (mentionedUser && mentionedUser.id !== user.id) {
+            // 4. Création de la notification
+            await Notification.create({
+              userId: mentionedUser.id,
+              notifierId: user.id,
+              tweetId: tweet.id,
+              type: 'MENTION',
+            })
+          }
         }
       }
     }
 
-    // 4. Gestion de la redirection
+    // 5. Gestion de la redirection
     if (payload.parentId) {
       const parent = await Tweet.query().where('id', payload.parentId).preload('user').first()
       if (parent) {
@@ -104,6 +142,7 @@ export default class TweetsController {
   async showTweet({ params, response, view, auth }: HttpContext) {
     const user = auth.getUserOrFail()
 
+    // 1. RÉCUPÉRATION DU TWEET PRINCIPAL AVEC VÉRIFICATION
     const tweet = await Tweet.query()
       .where('id', params.id)
       .preload('user')
@@ -112,6 +151,20 @@ export default class TweetsController {
       })
       .preload('replies', (query) => {
         query
+          .where((replyQuery) => {
+            replyQuery
+              .whereIn('user_id', (sub) => {
+                sub.from('users').select('id').where('is_private', false)
+              })
+              .orWhere('user_id', user.id)
+              .orWhereIn('user_id', (sub) => {
+                sub
+                  .from('follows')
+                  .select('following_id')
+                  .where('follower_id', user.id)
+                  .where('is_accepted', true)
+              })
+          })
           .preload('user')
           .orderBy('createdAt', 'desc')
           .select('*')
@@ -135,6 +188,20 @@ export default class TweetsController {
       return response.redirect().toRoute('home')
     }
 
+    // 2.VÉRIFIE SI DROIT DE VOIR LE TWEET
+    const isAuthor = tweet.userId === user.id
+    const isPublic = !tweet.user.isPrivate
+    const isFollowerAccepted = await db
+      .from('follows')
+      .where('follower_id', user.id)
+      .where('following_id', tweet.userId)
+      .where('is_accepted', true)
+      .first()
+
+    if (!isPublic && !isAuthor && !isFollowerAccepted) {
+      return response.redirect().toRoute('show_profile', { username: tweet.user.userName })
+    }
+
     // État du tweet principal
     tweet.isLiked = Boolean(tweet.$extras.is_liked)
 
@@ -143,6 +210,7 @@ export default class TweetsController {
       reply.isLiked = Boolean(reply.$extras.is_liked)
     })
 
+    // Redirection si l'username dans l'URL ne correspond pas
     if (tweet.user.userName !== params.username) {
       return response.redirect().toRoute('show_tweet', {
         username: tweet.user.userName,

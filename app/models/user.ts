@@ -7,6 +7,7 @@ import type { HasMany } from '@adonisjs/lucid/types/relations'
 import PasswordReset from '#models/password_reset'
 import Tweet from '#models/tweet'
 import Follow from '#models/follow'
+import Notification from '#models/notification'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -128,6 +129,18 @@ export default class User extends compose(BaseModel, AuthFinder) {
     foreignKey: 'followingId',
   })
   declare followers: HasMany<typeof Follow>
+
+  // Les notifications qu'on reçoit
+  @hasMany(() => Notification, {
+    foreignKey: 'userId',
+  })
+  declare notifications: HasMany<typeof Notification>
+
+  // Les actions que l'on fait
+  @hasMany(() => Notification, {
+    foreignKey: 'notifierId',
+  })
+  declare actionsPerformed: HasMany<typeof Notification>
 
   // ==========================================================
   // MÉTHODES STATIQUES

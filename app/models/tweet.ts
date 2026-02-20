@@ -15,6 +15,7 @@ import type { BelongsTo, HasMany, ManyToMany } from '@adonisjs/lucid/types/relat
 import User from '#models/user'
 import Like from '#models/like'
 import Hashtag from '#models/hashtag'
+import Notification from '#models/notification'
 
 export default class Tweet extends BaseModel {
   @column({ isPrimary: true })
@@ -138,55 +139,46 @@ export default class Tweet extends BaseModel {
     },
   })
   declare hashtags: ManyToMany<typeof Hashtag>
+
+  // Les notifications
+  @hasMany(() => Notification)
+  declare notifications: HasMany<typeof Notification>
   // ==========================================================
   // HOOKS Lucid pour gérer automatiquement les compteurs
   // ==========================================================
 
-  // Incrémenter le compteur de réponses du parent
   @afterCreate()
-  static async incrementParentReplies(tweet: Tweet) {
+  static async handleAfterCreate(tweet: Tweet) {
+    // 1. Le compteur de réponses
     if (tweet.parentId) {
-      const parent = await Tweet.find(tweet.parentId)
-      if (parent) {
-        parent.repliesCount++
-        await parent.save()
-      }
+      await Tweet.query().where('id', tweet.parentId).increment('replies_count', 1)
+    }
+
+    // 2. Le compteur de retweets
+    if (tweet.retweetId) {
+      await Tweet.query().where('id', tweet.retweetId).increment('retweets_count', 1)
     }
   }
 
-  // Décrémenter le compteur de réponses du parent
   @afterDelete()
-  static async decrementParentReplies(tweet: Tweet) {
+  static async handleAfterDelete(tweet: Tweet) {
+    // Décrémenter les réponses
     if (tweet.parentId) {
-      const parent = await Tweet.find(tweet.parentId)
-      if (parent && parent.repliesCount > 0) {
-        parent.repliesCount--
-        await parent.save()
-      }
-    }
-  }
+      await Tweet.query()
+        .where('id', tweet.parentId)
+        .where('replies_count', '>', 0)
+        .decrement('replies_count', 1)
 
-  // Incrémenter le compteur de retweets de l’original
-  @afterCreate()
-  static async incrementRetweets(tweet: Tweet) {
-    if (tweet.retweetId) {
-      const original = await Tweet.find(tweet.retweetId)
-      if (original) {
-        original.retweetsCount++
-        await original.save()
-      }
+      // supprimer la notification associée
+      await Notification.query().where('tweetId', tweet.id).where('type', 'REPLY').delete()
     }
-  }
 
-  // Décrémenter le compteur de retweets de l’original
-  @afterDelete()
-  static async decrementRetweets(tweet: Tweet) {
+    // Décrémenter les retweets
     if (tweet.retweetId) {
-      const original = await Tweet.find(tweet.retweetId)
-      if (original && original.retweetsCount > 0) {
-        original.retweetsCount--
-        await original.save()
-      }
+      await Tweet.query()
+        .where('id', tweet.retweetId)
+        .where('retweets_count', '>', 0)
+        .decrement('retweets_count', 1)
     }
   }
 }

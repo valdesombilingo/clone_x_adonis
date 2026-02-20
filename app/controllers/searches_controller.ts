@@ -23,7 +23,7 @@ export default class SearchController {
       return view.render('pages/search', { query: '', tab, results: [], user })
     }
 
-    // 1. RÉCUPÉRATION DES IDS BLOQUÉS
+    // 1. RÉCUPÉRATION DES IDS BLOQUÉS (Pour filtrer les tweets)
     const blocksAsBlocker = await db
       .from('blocks')
       .where('blocker_id', user.id)
@@ -33,7 +33,6 @@ export default class SearchController {
       .where('blocked_id', user.id)
       .select('blocker_id as id')
 
-    // On fusionne les deux tableaux d'IDs
     const excludeIds = [...blocksAsBlocker, ...blocksAsBlocked].map((b) => b.id)
 
     let results: any[] = []
@@ -45,17 +44,18 @@ export default class SearchController {
           q.where('fullName', 'ilike', `%${query}%`).orWhere('userName', 'ilike', `%${query}%`)
         })
         .whereNot('id', user.id)
+        // CHARGE LE FOLLOW POUR RÉCUPÉRER L'ÉTAT "ACCEPTED"
         .preload('followers', (q) => q.where('followerId', user.id))
         .preload('following', (q) => q.where('followingId', user.id))
         .select('*')
-        // 1. Vérifie si MOI je le bloque
+        // 1. Vérifie si moi je le bloque
         .select(
           db.raw(
             '(SELECT EXISTS (SELECT 1 FROM blocks WHERE blocker_id = ? AND blocked_id = users.id)) as i_blocked_him',
             [user.id]
           )
         )
-        // 2. Vérifie si LUI me bloque
+        // 2. Vérifie si lui me bloque
         .select(
           db.raw(
             '(SELECT EXISTS (SELECT 1 FROM blocks WHERE blocker_id = users.id AND blocked_id = ?)) as he_blocked_me',
@@ -65,12 +65,14 @@ export default class SearchController {
         .orderBy('followersCount', 'desc')
         .limit(50)
 
-      // On transforme les résultats bruts en booléens exploitables par Edge
+      // Transforme les résultats bruts en booléens exploitables par Edge
       results.forEach((u) => {
-        u.$extras.isFollowing = u.followers.length > 0
+        const followEntry = u.followers.length > 0 ? u.followers[0] : null
+        u.$extras.isFollowing = !!followEntry
+        u.$extras.isFollowAccepted = followEntry ? followEntry.isAccepted : false
         u.$extras.followsYou = u.following.length > 0
-        u.$extras.iBlockedHim = Boolean(u.$extras.i_blocked_him) // Ajouté
-        u.$extras.heBlockedMe = Boolean(u.$extras.he_blocked_me) // Ajouté
+        u.$extras.iBlockedHim = Boolean(u.$extras.i_blocked_him)
+        u.$extras.heBlockedMe = Boolean(u.$extras.he_blocked_me)
       })
     } else {
       // LOGIQUE ONGLET HASHTAGS (TWEETS)
@@ -81,7 +83,7 @@ export default class SearchController {
           .orWhere('content', 'ilike', `%${query}%`)
       })
 
-      // On maintient l'exclusion des tweets pour ne pas "polluer" le flux
+      // Maintient l'exclusion des tweets pour ne pas polluer le flux
       if (excludeIds.length > 0) {
         tweetQuery.whereNotIn('userId', excludeIds)
       }
@@ -90,6 +92,8 @@ export default class SearchController {
         .preload('user')
         .preload('hashtags')
         .preload('parent', (pQuery) => pQuery.preload('user'))
+        .withCount('replies')
+        .withCount('likes')
         .select('*')
         .select(
           db.raw(

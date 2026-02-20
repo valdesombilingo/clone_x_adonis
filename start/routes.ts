@@ -20,6 +20,7 @@ const LikesController = () => import('#controllers/likes_controller')
 const ProfilesController = () => import('#controllers/profiles_controller')
 const FollowsController = () => import('#controllers/follows_controller')
 const SearchController = () => import('#controllers/searches_controller')
+const NotificationsController = () => import('#controllers/notifications_controller')
 
 // Route d'affichage (Landing Page)
 router.on('/').render('pages/landing').as('landing').use(middleware.guest())
@@ -103,24 +104,49 @@ router
       router.get('/search', [SearchController, 'search']).as('search')
 
       // =========================================================================
-      //  3. ROUTES PROFILS
+      //  3. ROUTES NOTIFICATIONS
       // =========================================================================
+
+      // Route pour l'affichage des notifications
+      router
+        .get('/notifications', [NotificationsController, 'ShowNotification'])
+        .as('show_notification')
+      router
+
+        // Route pour supprimer une notifications
+        .delete('/notifications/:id', [NotificationsController, 'destroyNotification'])
+        .as('destroy_notification')
+
+      // =========================================================================
+      //  4. ROUTES PROFILS
+      // =========================================================================
+
       // Route pour l'affichage du profil utilisateur
       router.get('/:username', [ProfilesController, 'showProfile']).as('show_profile')
       // Route pour l'affichage page d'édition du profil
       router.get('/settings/profile', [ProfilesController, 'editProfile']).as('edit_profile')
       // Route pour la mise à jour du profil
       router.put('/settings/profile', [ProfilesController, 'updateProfile']).as('update_profile')
+      // Route pour bloquer / débloquer un utilisateur
+      router.post('/profiles/:id/block', [ProfilesController, 'toggleBlock']).as('toggle_block')
+      // Route compte privé / public
+      router.post('/settings/privacy', [ProfilesController, 'togglePrivacy']).as('toggle_privacy')
+
+      // --------------------------------------
+
       // Route pour suivre / ne plus suivre un utilisateur
       router.post('/users/:id/follow', [FollowsController, 'toggleFollow']).as('toggle_follow')
       // Route pour afficher la liste des abonnés / abonnements
       router.get('/users/:username/follow', [FollowsController, 'showFollow']).as('show_follow')
-      // Route pour bloquer / débloquer un utilisateur
-      router.post('/profiles/:id/block', [ProfilesController, 'toggleBlock']).as('toggle_block')
+
+      // Route pour Accepter demande de follow
+      router.post('/follows/:id/accept', [FollowsController, 'acceptFollow']).as('accept_follow')
+      // Route pour Décliner demande de follow
+      router.post('/follows/:id/reject', [FollowsController, 'rejectFollow']).as('reject_follow')
     })
 
     // =========================================================================
-    //  4. ROUTES TWEETS
+    //  5. ROUTES TWEETS
     // =========================================================================
 
     router.group(() => {

@@ -14,6 +14,7 @@ import hash from '@adonisjs/core/services/hash'
  * - Affichage édition du profil (editProfile)
  * - Mise à jour du profil (updateProfile)
  * - Blocage et déblocage d'un utilisateur (toggleBlock)
+ * - Compte privé (togglePrivacy)
  */
 export default class ProfilesController {
   // =========================================================================
@@ -53,7 +54,28 @@ export default class ProfilesController {
       })
     }
 
-    // 3. RÉCUPÉRATION DES IDS À EXCLURE POUR LE FILTRAGE DES TWEETS
+    // 3. EXTRACTION DES ÉTATS DE FOLLOW (Pour les boutons et la visibilité)
+    const followEntry = profileUser.followers.length > 0 ? profileUser.followers[0] : null
+    profileUser.$extras.isFollowing = !!followEntry
+    profileUser.$extras.isFollowAccepted = followEntry ? followEntry.isAccepted : false
+    profileUser.$extras.followsYou = profileUser.following.length > 0
+
+    // 4. LOGIQUE DE VISIBILITÉ DU CONTENU (Mode Privé)
+    const isMyProfile = authUser.id === profileUser.id
+    const canSeeContent =
+      !profileUser.isPrivate || isMyProfile || profileUser.$extras.isFollowAccepted
+
+    if (!canSeeContent) {
+      return view.render('pages/profiles/show', {
+        user: profileUser,
+        tweets: [],
+        tab,
+        iBlockedHim: false,
+        heBlockedMe: false,
+      })
+    }
+
+    // 5. RÉCUPÉRATION DES IDS À EXCLURE POUR LE FILTRAGE DES TWEETS
     const blocks = await db
       .from('blocks')
       .where('blocker_id', authUser.id)
@@ -61,10 +83,7 @@ export default class ProfilesController {
       .union(db.from('blocks').where('blocked_id', authUser.id).select('blocker_id as id'))
     const excludeIds = blocks.map((b) => b.id)
 
-    profileUser.$extras.isFollowing = (profileUser.followers?.length || 0) > 0
-    profileUser.$extras.followsYou = (profileUser.following?.length || 0) > 0
-
-    // 4. PRÉPARATION DE LA REQUÊTE
+    // 6. PRÉPARATION DE LA REQUÊTE
     const tweetsQuery = Tweet.query()
       .preload('user')
       .preload('parent', (q) => q.preload('user'))
@@ -80,12 +99,11 @@ export default class ProfilesController {
       .orderBy('createdAt', 'desc')
       .limit(500)
 
-    // 5. LOGIQUE DE FILTRAGE PAR ONGLET + SÉCURITÉ BLOCAGE
+    // 7. LOGIQUE DE FILTRAGE PAR ONGLET ET SÉCURITÉ BLOCAGE
     if (tab === 'posts') {
       tweetsQuery.where('userId', profileUser.id).whereNull('parentId')
     } else if (tab === 'replies') {
       tweetsQuery.where('userId', profileUser.id).whereNotNull('parentId')
-      // Ne pas montrer les réponses faites à des gens bloqués
       if (excludeIds.length > 0) {
         tweetsQuery.whereNotExists((q) => {
           q.from('tweets as parents')
@@ -97,7 +115,22 @@ export default class ProfilesController {
       tweetsQuery.whereIn('id', (q) =>
         q.from('likes').select('tweet_id').where('user_id', profileUser.id)
       )
-      // Ne pas montrer les likes sur des tweets d'auteurs bloqués
+
+      // Ne pas montrer les likes sur des tweets privés non autorisés
+      tweetsQuery.where((q) => {
+        q.whereIn('userId', (sub) => {
+          sub.from('users').select('id').where('is_private', false)
+        })
+          .orWhere('userId', authUser.id)
+          .orWhereIn('userId', (sub) => {
+            sub
+              .from('follows')
+              .select('following_id')
+              .where('follower_id', authUser.id)
+              .where('is_accepted', true)
+          })
+      })
+
       if (excludeIds.length > 0) {
         tweetsQuery.whereNotIn('userId', excludeIds)
       }
@@ -276,6 +309,20 @@ export default class ProfilesController {
       session.flash('success', 'Utilisateur bloqué.')
     }
 
+    return response.redirect().back()
+  }
+
+  // =========================================================================
+  // Logique de compte privé d'un utilisateur 'togglePrivacy'
+  // =========================================================================
+  async togglePrivacy({ auth, response, session }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    user.isPrivate = !user.isPrivate
+    await user.save()
+
+    const status = user.isPrivate ? 'privé' : 'public'
+    session.flash('success', `Votre compte est désormais ${status}.`)
     return response.redirect().back()
   }
 }

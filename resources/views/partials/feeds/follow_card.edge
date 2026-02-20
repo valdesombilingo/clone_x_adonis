@@ -53,19 +53,17 @@
       onclick="event.stopPropagation()"
     >
       @if(item.$extras.iBlockedHim)
-        {{-- Cas 1 : C'est toi qui l'as bloqué --}}
         <span class="inline-block w-24 sm:w-28 py-1.5 font-semiBold text-red-500 text-center cursor-default">
           Bloqué
       </span>
       @elseif(item.$extras.heBlockedMe)
-        {{-- Cas 2 : C'est lui qui t'a bloqué --}}
         <span
           class="inline-block w-24 sm:w-28 py-1.5 font-semiBold text-neutral-gray text-center cursor-default"
         >
           indisponible
       </span>
       @else
-        {{-- Cas 3 : Aucun blocage, on affiche le bouton Follow --}}
+        {{-- FORMULAIRE UNIQUE POUR TOUTES LES ACTIONS DE FOLLOW --}}
         <form
           action="{{ route('toggle_follow', { id: item.id }, { qs: { tab: tab || '', q: query || '' } }) }}"
           method="POST"
@@ -74,14 +72,23 @@
         >
           {{ csrfField() }}
           @if(item.$extras.isFollowing)
+            {{-- CAS : DÉJÀ UN LIEN (ABONNÉ OU DEMANDÉ) --}}
             <button
               type="submit"
               class="group py-1.5 border border-brand-secondary rounded-full font-bold text-white transition-all lg:hover:border-red-500/50 lg:hover:bg-red-500/10 lg:hover:text-red-500 w-28 sm:w-32"
             >
-              <span class="lg:group-hover:hidden">Abonné</span>
-              <span class="hidden lg:group-hover:inline text-sm">Désabonner</span>
+              @if(item.$extras.isFollowAccepted)
+                {{-- Etat : Abonné classique --}}
+                <span class="lg:group-hover:hidden">Abonné</span>
+                <span class="hidden lg:group-hover:inline text-sm">Désabonner</span>
+              @else
+                {{-- Etat : En attente sur compte privé --}}
+                <span class="lg:group-hover:hidden">Demandé</span>
+                <span class="hidden lg:group-hover:inline text-sm">Annuler</span>
+              @endif
             </button>
           @else
+            {{-- CAS : PAS ENCORE ABONNÉ --}}
             <button
               type="submit"
               class="font-bold py-1.5 bg-white text-background-dark rounded-full hover:bg-neutral-200 transition-all whitespace-nowrap {{ item.$extras.followsYou ? 'w-36 sm:w-40' : 'w-24 sm:w-28' }}"
@@ -93,6 +100,7 @@
       @endif
     </div>
   @endif
+  
   
   
 </div>

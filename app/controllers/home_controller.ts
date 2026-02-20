@@ -34,15 +34,33 @@ export default class HomeController {
       .orderBy('createdAt', 'desc')
       .limit(500)
 
-    // 3. EXCLURE LES TWEETS DES COMPTES BLOQUÉS / BLOQUANTS
+    // 3. EXCLURE LES TWEETS DES COMPTES BLOQUÉS ET BLOQUANTS EN PLUS FILTRE COMPTE PRIVÉ
     if (excludeIds.length > 0) {
       tweetsQuery.whereNotIn('userId', excludeIds)
     }
 
+    tweetsQuery.where((q) => {
+      q.whereIn('userId', (sub) => {
+        sub.from('users').select('id').where('is_private', false)
+      })
+        .orWhere('userId', user.id)
+        .orWhereIn('userId', (sub) => {
+          sub
+            .from('follows')
+            .select('following_id')
+            .where('follower_id', user.id)
+            .where('is_accepted', true)
+        })
+    })
+
     // 4. LOGIQUE DE L'ONGLET FOLLOWING
     if (tab === 'following') {
       tweetsQuery.whereIn('userId', (query) => {
-        query.from('follows').select('following_id').where('follower_id', user.id)
+        query
+          .from('follows')
+          .select('following_id')
+          .where('follower_id', user.id)
+          .where('is_accepted', true)
       })
     }
 

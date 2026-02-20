@@ -42,16 +42,14 @@
           @endcomponent
           
           {{-- Notifications --}}
-          <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
-            <div class="nav-link text-neutral-dark">
-
-              <hero-icon-outline name="bell" class="w-8 h-8  sm:w-7 sm:h-7">
-              </hero-icon-outline>
-
-              <span class="hidden lg:inline text-xl">Notifications</span>
-            </div>
-          </div>
-
+          @component('components/nav_links', {
+          href: route('show_notification', { username: auth.user.userName }),
+          route_name: 'show_notification',
+          icon: 'bell',
+          label: 'Notifications'
+          })
+          @endcomponent
+          
           {{-- Messages --}}
           <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
             <div class="nav-link text-neutral-dark">
@@ -265,16 +263,14 @@
     @endcomponent
           
     {{-- Notifications --}}
-    <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
-      <div class="nav-link text-neutral-dark">
-
-        <hero-icon-outline name="bell" class="w-8 h-8  sm:w-7 sm:h-7">
-        </hero-icon-outline>
-
-        <span class="hidden lg:inline text-xl">Notifications</span>
-      </div>
-    </div>
-
+    @component('components/nav_links', {
+          href: route('show_notification', { username: auth.user.userName }),
+          route_name: 'show_notification',
+          icon: 'bell',
+          label: 'Notifications'
+    })
+    @endcomponent
+    
     {{-- Messages --}}
     <div class="rounded-full hover:sm:bg-neutral-dark/40 w-fit cursor-default">
       <div class="nav-link text-neutral-dark">
