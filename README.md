@@ -88,8 +88,9 @@ Pour garantir la maintenabilité, une documentation de conception complète est 
 
 - 1. Cloner le dépôt
 
-git clone https://github.com/valdesombilingo/clone_x_adonis.git
-cd clone-x
+`git clone https://github.com/valdesombilingo/clone_x_adonis.git`
+
+`cd clone_x_adonis`
 
 - 2. Installer les dépendances
 
